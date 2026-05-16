@@ -1,0 +1,19 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Keystore
+keystore.jks
+keystore.b64
+
+
+# Gradle
+gradle/wrapper/gradle-*.zip
+gradle-wrapper-new.jar
