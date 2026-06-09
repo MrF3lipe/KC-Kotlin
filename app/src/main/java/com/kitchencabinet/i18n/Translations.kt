@@ -65,6 +65,7 @@ enum class StringKey {
     TIMER,
     START,
     PAUSE,
+    RESUME,
     RESET,
     SET_TIMER,
     MINUTES_SHORT,

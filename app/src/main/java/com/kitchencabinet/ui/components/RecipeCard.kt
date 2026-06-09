@@ -10,10 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.kitchencabinet.data.Recipe
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 
@@ -60,31 +62,17 @@ private fun CompactRecipeCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column {
-            // Image placeholder
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = recipe.title.take(2),
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        fontFamily = NewsreaderFontFamily,
-                    )
-                }
-            }
+            AsyncImage(
+                model = recipe.image,
+                contentDescription = recipe.title,
+                modifier = Modifier.fillMaxWidth().height(140.dp),
+                contentScale = ContentScale.Crop,
+            )
 
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Title
                 Text(
                     text = recipe.title,
                     style = MaterialTheme.typography.titleMedium,
@@ -95,7 +83,6 @@ private fun CompactRecipeCard(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                // Description
                 if (recipe.description.isNotBlank()) {
                     Text(
                         text = recipe.description,
@@ -106,13 +93,11 @@ private fun CompactRecipeCard(
                     )
                 }
 
-                // Footer: time and category
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Cook time
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -130,7 +115,6 @@ private fun CompactRecipeCard(
                         )
                     }
 
-                    // Category chip
                     if (recipe.category.isNotBlank()) {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
@@ -167,28 +151,14 @@ private fun LargeRecipeCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column {
-            // Image with favorite overlay
             Box {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = recipe.title.take(2),
-                            style = MaterialTheme.typography.displayMedium,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                            fontFamily = NewsreaderFontFamily,
-                        )
-                    }
-                }
+                AsyncImage(
+                    model = recipe.image,
+                    contentDescription = recipe.title,
+                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                    contentScale = ContentScale.Crop,
+                )
 
-                // Favorite button overlay
                 IconButton(
                     onClick = onToggleFavorite,
                     modifier = Modifier
@@ -222,12 +192,10 @@ private fun LargeRecipeCard(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Badges row (difficulty + time)
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Difficulty badge
                     if (recipe.difficulty.isNotBlank()) {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
@@ -243,7 +211,6 @@ private fun LargeRecipeCard(
                         }
                     }
 
-                    // Time badge
                     Surface(
                         shape = RoundedCornerShape(12.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -268,7 +235,6 @@ private fun LargeRecipeCard(
                     }
                 }
 
-                // Title
                 Text(
                     text = recipe.title,
                     style = MaterialTheme.typography.titleLarge,
@@ -279,7 +245,6 @@ private fun LargeRecipeCard(
                     color = MaterialTheme.colorScheme.onSurface,
                 )
 
-                // Description
                 if (recipe.description.isNotBlank()) {
                     Text(
                         text = recipe.description,
@@ -290,7 +255,6 @@ private fun LargeRecipeCard(
                     )
                 }
 
-                // "View Recipe" button
                 OutlinedButton(
                     onClick = onClick,
                     modifier = Modifier.fillMaxWidth(),

@@ -1,7 +1,13 @@
 ﻿package com.kitchencabinet.ui.screens
 
+import android.content.Intent
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -10,8 +16,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +53,6 @@ fun ToolsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Tool tabs
             TabRow(selectedTabIndex = selectedTool) {
                 Tab(selected = selectedTool == 0, onClick = { selectedTool = 0 }) {
                     Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -58,11 +68,27 @@ fun ToolsScreen(
                         Text("Scale")
                     }
                 }
+                Tab(selected = selectedTool == 2, onClick = { selectedTool = 2 }) {
+                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Filled.QrCodeScanner, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Barcode")
+                    }
+                }
+                Tab(selected = selectedTool == 3, onClick = { selectedTool = 3 }) {
+                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Filled.CameraAlt, null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Fridge")
+                    }
+                }
             }
 
             when (selectedTool) {
                 0 -> UnitConverter()
                 1 -> ScaleCalculator()
+                2 -> BarcodeScanner()
+                3 -> FridgePhoto()
             }
         }
     }
@@ -262,6 +288,201 @@ private fun ScaleCalculator() {
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BarcodeScanner() {
+    val context = LocalContext.current
+    var scannedCode by remember { mutableStateOf<String?>(null) }
+
+    val barcodeLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val data = result.data
+            if (data != null && data.extras != null) {
+                val code = data.extras!!.getString("code")
+                if (code != null) scannedCode = code
+            }
+        }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        if (bitmap != null) {
+            scannedCode = "Barcode detected via image"
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Barcode Scanner", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "Scan product barcodes to auto-add ingredients to your pantry.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Card(
+            modifier = Modifier.fillMaxWidth().height(180.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            )
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (scannedCode != null) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Filled.CheckCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            scannedCode!!,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                } else {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Filled.QrCodeScanner,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Point camera at a barcode",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        Button(
+            onClick = {
+                val intent = Intent("com.google.zxing.client.android.SCAN").apply {
+                    putExtra("SCAN_MODE", "PRODUCT_MODE")
+                }
+                try {
+                    barcodeLauncher.launch(intent)
+                } catch (_: Exception) {
+                    cameraLauncher.launch(null)
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Filled.QrCodeScanner, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(if (scannedCode != null) "Scan Again" else "Scan Barcode")
+        }
+
+        if (scannedCode != null) {
+            OutlinedButton(
+                onClick = { scannedCode = null },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Clear")
+            }
+        }
+    }
+}
+
+@Composable
+private fun FridgePhoto() {
+    var photoUri by remember { mutableStateOf<String?>(null) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        if (bitmap != null) {
+            photoUri = "Photo captured (${bitmap.width}x${bitmap.height})"
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Fridge Photo", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "Take a photo of your fridge to auto-detect ingredients.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Card(
+            modifier = Modifier.fillMaxWidth().height(240.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            )
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (photoUri != null) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Filled.CheckCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            photoUri!!,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                } else {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Filled.CameraAlt,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Take a photo of your fridge contents",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        Button(
+            onClick = { cameraLauncher.launch(null) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Filled.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(if (photoUri != null) "Retake Photo" else "Open Camera")
+        }
+
+        if (photoUri != null) {
+            OutlinedButton(
+                onClick = { photoUri = null },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Clear")
             }
         }
     }

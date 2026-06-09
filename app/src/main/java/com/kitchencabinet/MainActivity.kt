@@ -98,7 +98,8 @@ fun KitchenCabinetApp() {
                 recipeId = id,
                 onBack = { navController.popBackStack() },
                 onEdit = { navController.navigate("addedit?id=$it") },
-                onCook = { navController.navigate("cook/$it") }
+                onCook = { navController.navigate("cook/$it") },
+                onShare = { navController.navigate("share/$it") }
             )
         }
         composable(
@@ -125,6 +126,16 @@ fun KitchenCabinetApp() {
         ) { back ->
             val id = back.arguments!!.getInt("id")
             CookScreen(
+                recipeId = id,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            "share/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { back ->
+            val id = back.arguments!!.getInt("id")
+            ShareScreen(
                 recipeId = id,
                 onBack = { navController.popBackStack() }
             )

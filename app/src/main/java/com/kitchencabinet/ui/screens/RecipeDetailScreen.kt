@@ -97,6 +97,7 @@ fun RecipeDetailScreen(
     onBack: () -> Unit,
     onEdit: (Int) -> Unit,
     onCook: (Int) -> Unit,
+    onShare: (Int) -> Unit = {},
     viewModel: RecipeViewModel = viewModel()
 ) {
     var recipe by remember { mutableStateOf<Recipe?>(null) }
@@ -186,6 +187,13 @@ fun RecipeDetailScreen(
                             contentDescription = if (r.isFavorite) "Remove from favorites" else "Add to favorites",
                             tint = if (r.isFavorite) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    // Share button
+                    IconButton(onClick = { onShare(r.id) }) {
+                        Icon(
+                            Icons.Filled.Share,
+                            contentDescription = "Share recipe"
                         )
                     }
                     // Edit button
