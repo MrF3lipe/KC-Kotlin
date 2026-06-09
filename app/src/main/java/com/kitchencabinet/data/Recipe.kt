@@ -2,12 +2,11 @@ package com.kitchencabinet.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
 import org.json.JSONArray
 import org.json.JSONObject
 
 @Entity(tableName = "recipes")
-@TypeConverters(TypeConverters::class)
+@androidx.room.TypeConverters(AppTypeConverters::class)
 data class Recipe(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
