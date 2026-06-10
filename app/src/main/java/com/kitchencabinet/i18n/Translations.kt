@@ -24,7 +24,6 @@ enum class StringKey {
     SHOPPING,
     FAVORITES,
     SETTINGS,
-    MEAL_PLAN,
     TOOLS,
 
     // ── Common ──
@@ -162,7 +161,6 @@ val translations: Map<StringKey, Map<String, String>> = run {
         StringKey.SHOPPING to mapOf(es to "Compras", en to "Shopping"),
         StringKey.FAVORITES to mapOf(es to "Favoritos", en to "Favorites"),
         StringKey.SETTINGS to mapOf(es to "Ajustes", en to "Settings"),
-        StringKey.MEAL_PLAN to mapOf(es to "Plan de Comidas", en to "Meal Plan"),
         StringKey.TOOLS to mapOf(es to "Herramientas", en to "Tools"),
 
         // ── Common ──
