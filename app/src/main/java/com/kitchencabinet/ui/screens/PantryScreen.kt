@@ -330,6 +330,7 @@ private fun PantryItemRow(
 // PantryItemDialog
 // ──────────────────────────────────────────────────────────────────
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PantryItemDialog(
     item: PantryItem?,
