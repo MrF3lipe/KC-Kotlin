@@ -3,9 +3,9 @@ package com.kitchencabinet.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Heart
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.outlined.Heart
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -178,7 +178,7 @@ private fun LargeRecipeCard(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = if (recipe.isFavorite) Icons.Filled.Heart else Icons.Outlined.Heart,
+                                imageVector = if (recipe.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                                 contentDescription = if (recipe.isFavorite) "Remove from favorites" else "Add to favorites",
                                 modifier = Modifier.fillMaxSize(),
                                 tint = if (recipe.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,

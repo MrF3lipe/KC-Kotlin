@@ -94,6 +94,7 @@ fun ToolsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun UnitConverter() {
     var inputValue by remember { mutableStateOf("") }
@@ -209,6 +210,7 @@ private fun UnitConverter() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScaleCalculator() {
     var originalServings by remember { mutableStateOf("") }

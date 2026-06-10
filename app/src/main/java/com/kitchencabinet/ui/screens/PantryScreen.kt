@@ -138,10 +138,10 @@ fun PantryScreen(
                     items(group.items, key = { "pantry_${it.id}" }) { item ->
                         PantryItemRow(
                             item = item,
-                            onToggleAvailable = { viewModel.toggleAvailable(it) },
-                            onAdjustQuantity = { delta -> viewModel.adjustQuantity(it, delta) },
-                            onEdit = { editItem = it; showDialog = true },
-                            onDelete = { viewModel.delete(it) }
+                            onToggleAvailable = { viewModel.toggleAvailable(item) },
+                            onAdjustQuantity = { delta -> viewModel.adjustQuantity(item, delta) },
+                            onEdit = { editItem = item; showDialog = true },
+                            onDelete = { viewModel.delete(item) }
                         )
                     }
                 }

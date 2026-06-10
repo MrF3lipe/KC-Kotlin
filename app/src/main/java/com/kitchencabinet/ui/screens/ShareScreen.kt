@@ -61,6 +61,8 @@ fun ShareScreen(
                 CircularProgressIndicator()
             }
         } else {
+            val deepLink = "https://kitchencabinet.app/recipe/${r.id}"
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -138,7 +140,6 @@ fun ShareScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Share as Link", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                         Spacer(Modifier.height(8.dp))
-                        val deepLink = "https://kitchencabinet.app/recipe/${r.id}"
                         OutlinedTextField(
                             value = deepLink,
                             onValueChange = {},

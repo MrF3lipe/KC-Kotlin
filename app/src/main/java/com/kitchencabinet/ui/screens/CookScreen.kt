@@ -468,16 +468,14 @@ private fun onTimerExpired(context: Context) {
             context.packageName
         )
         if (resId != 0) {
-            val mediaPlayer = MediaPlayer.create(
-                context,
-                resId,
-                null,
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            )
+            val mediaPlayer = MediaPlayer.create(context, resId)
             mediaPlayer?.apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
                 setOnCompletionListener { release() }
                 setOnErrorListener { _, _, _ -> release(); true }
                 start()
