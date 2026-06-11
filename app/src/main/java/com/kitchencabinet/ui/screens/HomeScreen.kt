@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.ui.components.RecipeCard
 import com.kitchencabinet.ui.components.RecipeCardVariant
@@ -47,10 +48,10 @@ fun HomeScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Title: "What to cook?"
+        // Title: "¿Qué cocinamos hoy?"
         item {
             Text(
-                text = "What to cook?",
+                text = "\u00BFQu\u00E9 cocinamos hoy?",
                 style = MaterialTheme.typography.displaySmall,
                 fontFamily = NewsreaderFontFamily,
                 fontWeight = FontWeight.SemiBold,
@@ -58,12 +59,13 @@ fun HomeScreen(
             )
         }
 
-        // Search bar
+        // Search bar — pill style
         item {
             Surface(
                 shape = RoundedCornerShape(50),
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
                 tonalElevation = 0.dp,
+                shadowElevation = 0.dp,
             ) {
                 Row(
                     modifier = Modifier
@@ -83,7 +85,7 @@ fun HomeScreen(
                         onValueChange = { searchQuery = it },
                         placeholder = {
                             Text(
-                                "Search recipes...",
+                                "Buscar recetas\u2026",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -124,17 +126,19 @@ fun HomeScreen(
                         color = when {
                             isSelected && chipTone == "primary" -> MaterialTheme.colorScheme.primary
                             isSelected && chipTone == "secondary" -> MaterialTheme.colorScheme.secondaryContainer
+                            isSelected -> MaterialTheme.colorScheme.onBackground
                             else -> MaterialTheme.colorScheme.surfaceContainerHigh
                         }
                     ) {
                         Text(
-                            text = category,
-                            style = MaterialTheme.typography.labelLarge,
+                            text = category.uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp,
                             color = when {
                                 isSelected && chipTone == "primary" -> MaterialTheme.colorScheme.onPrimary
                                 isSelected && chipTone == "secondary" -> MaterialTheme.colorScheme.onSecondaryContainer
-                                isSelected -> MaterialTheme.colorScheme.onSurface
+                                isSelected -> MaterialTheme.colorScheme.background
                                 else -> MaterialTheme.colorScheme.onSurfaceVariant
                             },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -154,7 +158,8 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (searchQuery.isNotBlank()) "No results found" else "No recipes yet. Tap + to add one!",
+                        text = if (searchQuery.isNotBlank()) "No se encontraron resultados"
+                        else "Todav\u00EDa no hay recetas. \u00A1Agreg\u00E1 una!",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

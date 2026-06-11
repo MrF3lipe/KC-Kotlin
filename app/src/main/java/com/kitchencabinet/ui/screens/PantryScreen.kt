@@ -1,9 +1,9 @@
 package com.kitchencabinet.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -11,13 +11,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.data.PantryCategory
 import com.kitchencabinet.data.PantryItem
+import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.CategoryWithItems
 import com.kitchencabinet.viewmodel.PantryViewModel
 
@@ -35,42 +38,30 @@ fun PantryScreen(
     var showCategoryManager by remember { mutableStateOf(false) }
     var editItem by remember { mutableStateOf<PantryItem?>(null) }
 
+    val allItems = groupedItems.flatMap { it.items }
+    val totalItems = categories.sumOf { cat -> groupedItems.find { it.category.name == cat.name }?.items?.size ?: 0 }
+
     // Add/Edit Dialog
     if (showDialog) {
-        PantryItemDialog(
+        PantryItemBottomSheet(
             item = editItem,
             categories = categories,
             onDismiss = { showDialog = false; editItem = null },
             onConfirm = { name, category, qty, unit ->
                 val item = editItem
                 if (item == null) {
-                    viewModel.insert(
-                        PantryItem(
-                            name = name,
-                            category = category,
-                            quantity = qty.toDoubleOrNull() ?: 1.0,
-                            unit = unit
-                        )
-                    )
+                    viewModel.insert(PantryItem(name = name, category = category, quantity = qty.toDoubleOrNull() ?: 1.0, unit = unit))
                 } else {
-                    viewModel.update(
-                        item.copy(
-                            name = name,
-                            category = category,
-                            quantity = qty.toDoubleOrNull() ?: 1.0,
-                            unit = unit
-                        )
-                    )
+                    viewModel.update(item.copy(name = name, category = category, quantity = qty.toDoubleOrNull() ?: 1.0, unit = unit))
                 }
-                showDialog = false
-                editItem = null
+                showDialog = false; editItem = null
             }
         )
     }
 
-    // Category Manager
+    // Category Manager Bottom Sheet
     if (showCategoryManager) {
-        CategoryManagerDialog(
+        CategoryManagerBottomSheet(
             categories = categories,
             onDismiss = { showCategoryManager = false },
             onInsert = { viewModel.insertCategory(it) },
@@ -79,26 +70,13 @@ fun PantryScreen(
         )
     }
 
-    val allItems = groupedItems.flatMap { it.items }
-
     Box(modifier = modifier.fillMaxSize()) {
         if (allItems.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Filled.Kitchen, null,
-                        Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Icon(Icons.Filled.Kitchen, null, Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(12.dp))
-                    Text(
-                        "Your pantry is empty",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("Tu despensa est\u00E1 vac\u00EDa", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
@@ -107,31 +85,85 @@ fun PantryScreen(
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                // Header
+                item(key = "header") {
+                    Column(modifier = Modifier.padding(bottom = 8.dp)) {
+                        Text(
+                            "\u00BFQu\u00E9 hay en la despensa?",
+                            style = MaterialTheme.typography.displayMedium,
+                            fontFamily = NewsreaderFontFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "$totalItems / $totalItems items",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+
+                // Action buttons
+                item(key = "actions") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            onClick = { showDialog = true },
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.primary,
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(16.dp))
+                                Text(
+                                    "A\u00F1adir ingrediente",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.5.sp,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                )
+                            }
+                        }
+                        Surface(
+                            onClick = { showCategoryManager = true },
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.surface,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        ) {
+                            Text(
+                                "Gestionar categor\u00EDas",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+                            )
+                        }
+                    }
+                }
+
                 groupedItems.forEach { group ->
-                    val emoji = group.category.emoji ?: "📦"
+                    val emoji = group.category.emoji ?: "\uD83D\uDCE6"
                     val catName = group.category.name
 
-                    // Category header
                     item(key = "cat_$catName") {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp, horizontal = 4.dp)
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 4.dp)
                         ) {
                             Text(emoji, style = MaterialTheme.typography.titleMedium)
                             Spacer(Modifier.width(8.dp))
-                            Text(
-                                catName,
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            Text(catName, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
                             Spacer(Modifier.weight(1f))
-                            Text(
-                                "${group.items.size} items",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Text("${group.items.size} items", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
 
@@ -147,40 +179,8 @@ fun PantryScreen(
                 }
             }
         }
-
-        // Bottom FABs
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            FloatingActionButton(
-                onClick = { showCategoryManager = true },
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    Icons.Filled.Settings,
-                    contentDescription = "Manage categories",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            FloatingActionButton(
-                onClick = { showDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add item")
-            }
-        }
     }
 }
-
-// ──────────────────────────────────────────────────────────────────
-// PantryItemRow
-// ──────────────────────────────────────────────────────────────────
 
 @Composable
 private fun PantryItemRow(
@@ -193,146 +193,76 @@ private fun PantryItemRow(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (item.available)
-                MaterialTheme.colorScheme.surfaceContainerLow
-            else
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+            containerColor = if (item.available) MaterialTheme.colorScheme.surfaceContainerLow
+            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        shape = RoundedCornerShape(12.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 4.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ── Checkbox ──
-            Checkbox(
-                checked = item.available,
-                onCheckedChange = { onToggleAvailable(item) }
-            )
+            Checkbox(checked = item.available, onCheckedChange = { onToggleAvailable(item) })
 
-            // ── Name + expiry column ──
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    item.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 1,
+                    item.name, style = MaterialTheme.typography.titleSmall, maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    textDecoration = if (!item.available)
-                        TextDecoration.LineThrough
-                    else
-                        TextDecoration.None
+                    textDecoration = if (!item.available) TextDecoration.LineThrough else TextDecoration.None
                 )
-
-                // Expiry info
                 if (item.expiresAt != null && item.expiresAt > 0) {
                     val daysLeft = (item.expiresAt - System.currentTimeMillis()) / 86400000
                     val expiryText = when {
-                        daysLeft < 0 -> "Expired!"
-                        daysLeft == 0L -> "Today"
-                        daysLeft == 1L -> "Tomorrow"
-                        daysLeft <= 3L -> "${daysLeft} days left"
-                        else -> "${daysLeft} days left"
+                        daysLeft < 0 -> "\u00A1Vencido!"
+                        daysLeft == 0L -> "Hoy"
+                        daysLeft == 1L -> "Ma\u00F1ana"
+                        daysLeft <= 3L -> "${daysLeft} d\u00EDas"
+                        else -> "${daysLeft} d\u00EDas"
                     }
                     val expiryColor = when {
                         daysLeft <= 1L -> MaterialTheme.colorScheme.error
                         daysLeft <= 3L -> MaterialTheme.colorScheme.tertiary
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                     }
-                    Text(
-                        expiryText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = expiryColor
-                    )
+                    Text(expiryText, style = MaterialTheme.typography.bodySmall, color = expiryColor)
                 }
             }
 
-            // ── Quantity controls ──
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Decrement
-                FilledTonalButton(
-                    onClick = {
-                        val step = if (item.unit == "ud") 1.0
-                        else if (item.quantity > 100) 100.0
-                        else if (item.quantity > 10) 10.0
-                        else 1.0
-                        onAdjustQuantity(-step)
-                    },
-                    modifier = Modifier.size(32.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(Icons.Filled.Remove, contentDescription = "Decrease", modifier = Modifier.size(18.dp))
+                FilledTonalButton(onClick = {
+                    val step = if (item.unit == "ud") 1.0 else if (item.quantity >= 100) 100.0 else if (item.quantity >= 10) 10.0 else 1.0
+                    onAdjustQuantity(-step)
+                }, modifier = Modifier.size(32.dp), contentPadding = PaddingValues(0.dp),
+                    shape = RoundedCornerShape(50)) {
+                    Icon(Icons.Filled.Remove, "Decrease", Modifier.size(18.dp))
                 }
-
                 Spacer(Modifier.width(6.dp))
-
-                // Quantity text
-                Text(
-                    text = if (item.quantity == item.quantity.toLong().toDouble())
-                        item.quantity.toLong().toString()
-                    else
-                        String.format("%.1f", item.quantity),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
+                Text(if (item.quantity == item.quantity.toLong().toDouble()) item.quantity.toLong().toString() else String.format("%.1f", item.quantity),
+                    style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.width(6.dp))
-
-                // Increment
-                FilledTonalButton(
-                    onClick = {
-                        val step = if (item.unit == "ud") 1.0
-                        else if (item.quantity >= 100) 100.0
-                        else if (item.quantity >= 10) 10.0
-                        else 1.0
-                        onAdjustQuantity(step)
-                    },
-                    modifier = Modifier.size(32.dp),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(Icons.Filled.Add, contentDescription = "Increase", modifier = Modifier.size(18.dp))
+                FilledTonalButton(onClick = {
+                    val step = if (item.unit == "ud") 1.0 else if (item.quantity >= 100) 100.0 else if (item.quantity >= 10) 10.0 else 1.0
+                    onAdjustQuantity(step)
+                }, modifier = Modifier.size(32.dp), contentPadding = PaddingValues(0.dp),
+                    shape = RoundedCornerShape(50)) {
+                    Icon(Icons.Filled.Add, "Increase", Modifier.size(18.dp))
                 }
             }
-
             Spacer(Modifier.width(6.dp))
-
-            // ── Unit ──
-            Text(
-                item.unit,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.width(28.dp)
-            )
-
-            // ── Edit button ──
+            Text(item.unit, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(28.dp))
             IconButton(onClick = { onEdit(item) }, modifier = Modifier.size(36.dp)) {
-                Icon(
-                    Icons.Filled.Edit,
-                    contentDescription = "Edit item",
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Icon(Icons.Filled.Edit, "Edit", Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-
-            // ── Delete button ──
             IconButton(onClick = { onDelete(item) }, modifier = Modifier.size(36.dp)) {
-                Icon(
-                    Icons.Filled.Delete,
-                    contentDescription = "Delete item",
-                    modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.error
-                )
+                Icon(Icons.Filled.Delete, "Delete", Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
             }
         }
     }
 }
 
-// ──────────────────────────────────────────────────────────────────
-// PantryItemDialog
-// ──────────────────────────────────────────────────────────────────
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PantryItemDialog(
+private fun PantryItemBottomSheet(
     item: PantryItem?,
     categories: List<PantryCategory>,
     onDismiss: () -> Unit,
@@ -345,120 +275,65 @@ private fun PantryItemDialog(
     var categoryExpanded by remember { mutableStateOf(false) }
     var unitExpanded by remember { mutableStateOf(false) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(if (item == null) "Add Item" else "Edit Item")
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Name
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Name") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                if (item == null) "A\u00F1adir ingrediente" else "Editar ingrediente",
+                style = MaterialTheme.typography.titleLarge,
+                fontFamily = NewsreaderFontFamily,
+                fontWeight = FontWeight.SemiBold,
+            )
 
-                // Category dropdown
-                ExposedDropdownMenuBox(
-                    expanded = categoryExpanded,
-                    onExpandedChange = { categoryExpanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = selectedCategory,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Category") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = categoryExpanded,
-                        onDismissRequest = { categoryExpanded = false }
-                    ) {
-                        categories.forEach { cat ->
-                            DropdownMenuItem(
-                                text = {
-                                    val emoji = cat.emoji ?: "📦"
-                                    Text("$emoji  ${cat.name}")
-                                },
-                                onClick = {
-                                    selectedCategory = cat.name
-                                    categoryExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
+            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nombre") },
+                singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
 
-                // Quantity
-                OutlinedTextField(
-                    value = quantity,
-                    onValueChange = { quantity = it },
-                    label = { Text("Quantity") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // Unit dropdown
-                ExposedDropdownMenuBox(
-                    expanded = unitExpanded,
-                    onExpandedChange = { unitExpanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = selectedUnit,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Unit") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = unitExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = unitExpanded,
-                        onDismissRequest = { unitExpanded = false }
-                    ) {
-                        UNITS.forEach { unit ->
-                            DropdownMenuItem(
-                                text = { Text(unit) },
-                                onClick = {
-                                    selectedUnit = unit
-                                    unitExpanded = false
-                                }
-                            )
-                        }
+            ExposedDropdownMenuBox(expanded = categoryExpanded, onExpandedChange = { categoryExpanded = it }) {
+                OutlinedTextField(value = selectedCategory, onValueChange = {}, readOnly = true,
+                    label = { Text("Categor\u00EDa") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp))
+                ExposedDropdownMenu(expanded = categoryExpanded, onDismissRequest = { categoryExpanded = false }) {
+                    categories.forEach { cat ->
+                        DropdownMenuItem(text = { Text("${cat.emoji ?: "\uD83D\uDCE6"}  ${cat.name}") },
+                            onClick = { selectedCategory = cat.name; categoryExpanded = false })
                     }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(
+
+            OutlinedTextField(value = quantity, onValueChange = { quantity = it }, label = { Text("Cantidad") },
+                singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+
+            ExposedDropdownMenuBox(expanded = unitExpanded, onExpandedChange = { unitExpanded = it }) {
+                OutlinedTextField(value = selectedUnit, onValueChange = {}, readOnly = true,
+                    label = { Text("Unidad") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = unitExpanded) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp))
+                ExposedDropdownMenu(expanded = unitExpanded, onDismissRequest = { unitExpanded = false }) {
+                    UNITS.forEach { unit ->
+                        DropdownMenuItem(text = { Text(unit) }, onClick = { selectedUnit = unit; unitExpanded = false })
+                    }
+                }
+            }
+
+            Button(
                 onClick = { onConfirm(name, selectedCategory, quantity, selectedUnit) },
-                enabled = name.isNotBlank()
-            ) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+                enabled = name.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(50)
+            ) { Text("Guardar") }
+
+            Spacer(Modifier.height(24.dp))
         }
-    )
+    }
 }
 
-// ──────────────────────────────────────────────────────────────────
-// CategoryManagerDialog
-// ──────────────────────────────────────────────────────────────────
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CategoryManagerDialog(
+private fun CategoryManagerBottomSheet(
     categories: List<PantryCategory>,
     onDismiss: () -> Unit,
     onInsert: (PantryCategory) -> Unit,
@@ -471,136 +346,79 @@ private fun CategoryManagerDialog(
     var editName by remember { mutableStateOf("") }
     var editEmoji by remember { mutableStateOf("") }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Manage Categories") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Existing categories
-                categories.forEach { cat ->
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 24.dp, vertical = 8.dp)
+                .heightIn(max = 500.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                "Gestionar categor\u00EDas",
+                style = MaterialTheme.typography.titleLarge,
+                fontFamily = NewsreaderFontFamily,
+                fontWeight = FontWeight.SemiBold,
+            )
+
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                items(categories, key = { it.id }) { cat ->
                     if (editingId == cat.id) {
-                        // Inline edit mode
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            OutlinedTextField(
-                                value = editEmoji,
-                                onValueChange = { editEmoji = it },
-                                modifier = Modifier.width(56.dp),
-                                singleLine = true,
-                                placeholder = { Text("📦") }
-                            )
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                            OutlinedTextField(value = editEmoji, onValueChange = { editEmoji = it },
+                                modifier = Modifier.width(56.dp), singleLine = true, placeholder = { Text("\uD83D\uDCE6") })
                             Spacer(Modifier.width(8.dp))
-                            OutlinedTextField(
-                                value = editName,
-                                onValueChange = { editName = it },
-                                modifier = Modifier.weight(1f),
-                                singleLine = true
-                            )
+                            OutlinedTextField(value = editName, onValueChange = { editName = it },
+                                modifier = Modifier.weight(1f), singleLine = true)
                             IconButton(onClick = {
-                                if (editName.isNotBlank()) {
-                                    onUpdate(cat.copy(name = editName, emoji = editEmoji.ifBlank { null }))
-                                }
+                                if (editName.isNotBlank()) { onUpdate(cat.copy(name = editName, emoji = editEmoji.ifBlank { null })) }
                                 editingId = null
-                            }) {
-                                Icon(Icons.Filled.Check, contentDescription = "Save")
-                            }
-                            IconButton(onClick = { editingId = null }) {
-                                Icon(Icons.Filled.Close, contentDescription = "Cancel")
-                            }
+                            }) { Icon(Icons.Filled.Check, "Save") }
+                            IconButton(onClick = { editingId = null }) { Icon(Icons.Filled.Close, "Cancel") }
                         }
                     } else {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    editingId = cat.id
-                                    editName = cat.name
-                                    editEmoji = cat.emoji ?: ""
-                                }
-                                .padding(vertical = 4.dp)
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                         ) {
-                            Text(cat.emoji ?: "📦", style = MaterialTheme.typography.bodyLarge)
+                            Text(cat.emoji ?: "\uD83D\uDCE6", style = MaterialTheme.typography.bodyLarge)
                             Spacer(Modifier.width(8.dp))
-                            Text(
-                                cat.name,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.weight(1f)
-                            )
+                            Text(cat.name, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                             if (categories.size > 1) {
-                                IconButton(
-                                    onClick = { onDelete(cat) },
-                                    modifier = Modifier.size(32.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Filled.Delete,
-                                        contentDescription = "Delete ${cat.name}",
-                                        modifier = Modifier.size(18.dp),
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
+                                IconButton(onClick = { editingId = cat.id; editName = cat.name; editEmoji = cat.emoji ?: "" },
+                                    modifier = Modifier.size(32.dp)) {
+                                    Icon(Icons.Filled.Edit, "Edit", Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                IconButton(onClick = { onDelete(cat) }, modifier = Modifier.size(32.dp)) {
+                                    Icon(Icons.Filled.Delete, "Delete", Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
                                 }
                             }
                         }
                     }
                 }
 
-                Divider(modifier = Modifier.padding(vertical = 4.dp))
-
-                // Add new category
-                Text(
-                    "Add new category",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        value = newEmoji,
-                        onValueChange = { newEmoji = it },
-                        modifier = Modifier.width(56.dp),
-                        singleLine = true,
-                        placeholder = { Text("📦") }
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    OutlinedTextField(
-                        value = newName,
-                        onValueChange = { newName = it },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                        placeholder = { Text("Category name") }
-                    )
-                    IconButton(
-                        onClick = {
+                item {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    Text("A\u00F1adir categor\u00EDa", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(value = newEmoji, onValueChange = { newEmoji = it },
+                            modifier = Modifier.width(56.dp), singleLine = true, placeholder = { Text("\uD83D\uDCE6") })
+                        Spacer(Modifier.width(8.dp))
+                        OutlinedTextField(value = newName, onValueChange = { newName = it },
+                            modifier = Modifier.weight(1f), singleLine = true, placeholder = { Text("Nombre") })
+                        IconButton(onClick = {
                             if (newName.isNotBlank()) {
-                                onInsert(
-                                    PantryCategory(
-                                        name = newName,
-                                        emoji = newEmoji.ifBlank { null }
-                                    )
-                                )
-                                newName = ""
-                                newEmoji = ""
+                                onInsert(PantryCategory(name = newName, emoji = newEmoji.ifBlank { null }))
+                                newName = ""; newEmoji = ""
                             }
-                        },
-                        enabled = newName.isNotBlank()
-                    ) {
-                        Icon(
-                            Icons.Filled.Add,
-                            contentDescription = "Add category",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                        }, enabled = newName.isNotBlank()) {
+                            Icon(Icons.Filled.Add, "Add", tint = MaterialTheme.colorScheme.primary)
+                        }
                     }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Done")
-            }
+
+            Spacer(Modifier.height(24.dp))
         }
-    )
+    }
 }

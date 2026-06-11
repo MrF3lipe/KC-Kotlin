@@ -1,16 +1,15 @@
 package com.kitchencabinet.ui.components
 
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Kitchen
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Kitchen
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,10 +29,10 @@ data class BottomNavItem(
 @Composable
 fun BottomNavBar(navController: NavController) {
     val items = listOf(
-        BottomNavItem("home", "Explore", Icons.Filled.Explore, Icons.Outlined.Explore),
-        BottomNavItem("search", "Search", Icons.Filled.Search, Icons.Outlined.Search),
-        BottomNavItem("pantry", "Pantry", Icons.Filled.Kitchen, Icons.Outlined.Kitchen),
-        BottomNavItem("shopping", "Shopping", Icons.Filled.ShoppingCart, Icons.Outlined.ShoppingCart),
+        BottomNavItem("home", "Explorar", Icons.Filled.Explore, Icons.Outlined.Explore),
+        BottomNavItem("search", "Buscar", Icons.Filled.Search, Icons.Outlined.Search),
+        BottomNavItem("addedit", "Nueva", Icons.Filled.AddCircle, Icons.Outlined.AddCircle),
+        BottomNavItem("pantry", "Despensa", Icons.Filled.Kitchen, Icons.Outlined.Kitchen),
     )
 
     val backStack by navController.currentBackStackEntryAsState()
@@ -47,9 +46,8 @@ fun BottomNavBar(navController: NavController) {
             val selected = when (item.route) {
                 "home" -> currentRoute == "home"
                 "search" -> currentRoute == "search"
-                "pantry" -> currentRoute == "pantry"
-                "shopping" -> currentRoute == "shopping"
                 "addedit" -> currentRoute?.startsWith("addedit") == true
+                "pantry" -> currentRoute == "pantry"
                 else -> currentRoute == item.route
             }
 
