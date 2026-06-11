@@ -47,12 +47,12 @@ fun PantryScreen(
             item = editItem,
             categories = categories,
             onDismiss = { showDialog = false; editItem = null },
-            onConfirm = { name, category, qty, unit ->
+            onConfirm = { name, category, qty, unit, expiresAt ->
                 val item = editItem
                 if (item == null) {
-                    viewModel.insert(PantryItem(name = name, category = category, quantity = qty.toDoubleOrNull() ?: 1.0, unit = unit))
+                    viewModel.insert(PantryItem(name = name, category = category, quantity = qty.toDoubleOrNull() ?: 1.0, unit = unit, expiresAt = expiresAt))
                 } else {
-                    viewModel.update(item.copy(name = name, category = category, quantity = qty.toDoubleOrNull() ?: 1.0, unit = unit))
+                    viewModel.update(item.copy(name = name, category = category, quantity = qty.toDoubleOrNull() ?: 1.0, unit = unit, expiresAt = expiresAt))
                 }
                 showDialog = false; editItem = null
             }
@@ -266,14 +266,16 @@ private fun PantryItemBottomSheet(
     item: PantryItem?,
     categories: List<PantryCategory>,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, category: String, quantity: String, unit: String) -> Unit,
+    onConfirm: (name: String, category: String, quantity: String, unit: String, expiresAt: Long?) -> Unit,
 ) {
     var name by remember { mutableStateOf(item?.name ?: "") }
     var selectedCategory by remember { mutableStateOf(item?.category ?: categories.firstOrNull()?.name ?: "General") }
     var quantity by remember { mutableStateOf(if (item != null) item.quantity.toString() else "1") }
     var selectedUnit by remember { mutableStateOf(item?.unit ?: "ud") }
+    var expiresAt by remember { mutableStateOf(item?.expiresAt) }
     var categoryExpanded by remember { mutableStateOf(false) }
     var unitExpanded by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
@@ -303,6 +305,41 @@ private fun PantryItemBottomSheet(
                 }
             }
 
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    if (expiresAt != null) "Caduca: ${formatDate(expiresAt!!)}" else "Sin fecha de caducidad",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f)
+                )
+                TextButton(onClick = { showDatePicker = true }) {
+                    Text(if (expiresAt != null) "Cambiar" else "A\u00F1adir")
+                }
+                if (expiresAt != null) {
+                    IconButton(onClick = { expiresAt = null }, modifier = Modifier.size(36.dp)) {
+                        Icon(Icons.Filled.Close, "Quitar fecha", Modifier.size(16.dp))
+                    }
+                }
+            }
+
+            if (showDatePicker) {
+                val datePickerState = rememberDatePickerState(initialSelectedDateMillis = expiresAt)
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            expiresAt = datePickerState.selectedDateMillis
+                            showDatePicker = false
+                        }) { Text("OK") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            }
+
             OutlinedTextField(value = quantity, onValueChange = { quantity = it }, label = { Text("Cantidad") },
                 singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
@@ -320,7 +357,7 @@ private fun PantryItemBottomSheet(
             }
 
             Button(
-                onClick = { onConfirm(name, selectedCategory, quantity, selectedUnit) },
+                onClick = { onConfirm(name, selectedCategory, quantity, selectedUnit, expiresAt) },
                 enabled = name.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(50)
@@ -329,6 +366,11 @@ private fun PantryItemBottomSheet(
             Spacer(Modifier.height(24.dp))
         }
     }
+}
+
+private fun formatDate(millis: Long): String {
+    val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+    return sdf.format(java.util.Date(millis))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
