@@ -40,6 +40,7 @@ fun SearchScreen(
     var selectedDifficulty by remember { mutableStateOf<String?>(null) }
     var showDifficultyFilter by remember { mutableStateOf(false) }
     var showCookableOnly by remember { mutableStateOf(false) }
+    var selectedEquipment by remember { mutableStateOf<Set<String>>(emptySet()) }
 
     LaunchedEffect(Unit) { viewModel.setCategory("All") }
 
@@ -49,7 +50,13 @@ fun SearchScreen(
             .distinct().sorted()
     }
 
-    val (cookable, almost, others) = remember(results, selectedIngredients, selectedDifficulty, showCookableOnly, pantryItems) {
+    val equipmentOptions = remember(results) {
+        results.flatMap { it.equipment }
+            .filter { it.isNotBlank() }
+            .distinct().sorted()
+    }
+
+    val (cookable, almost, others) = remember(results, selectedIngredients, selectedDifficulty, showCookableOnly, pantryItems, selectedEquipment) {
         val availablePantry = pantryItems.filter { it.available }
             .map { it.name.lowercase().trim() }.toSet()
 
@@ -59,6 +66,8 @@ fun SearchScreen(
             .filter { if (selectedDifficulty != null) it.difficulty == selectedDifficulty else true }
             .filter { if (selectedIngredients.isEmpty()) true
                 else it.ingredients.any { ing -> selectedIngredients.any { sel -> ing.name.lowercase().contains(sel) || sel.contains(ing.name.lowercase()) } } }
+            .filter { if (selectedEquipment.isEmpty()) true
+                else selectedEquipment.all { sel -> it.equipment.any { eq -> eq.lowercase().contains(sel.lowercase()) } } }
             .map { recipe ->
                 if (recipe.ingredients.isEmpty()) MatchResult(recipe, 0, 0)
                 else {
@@ -177,6 +186,18 @@ fun SearchScreen(
                         ChipGrid(chips = ingredientOptions, selected = selectedIngredients) {
                             selectedIngredients = if (it in selectedIngredients) selectedIngredients - it
                             else selectedIngredients + it
+                        }
+                    }
+                }
+            }
+
+            // ── Equipment section ──────────────────────────────────────────────
+            if (equipmentOptions.isNotEmpty()) {
+                item(key = "equipment_header") {
+                    SectionCard(title = "Utensilios") {
+                        ChipGrid(chips = equipmentOptions, selected = selectedEquipment) {
+                            selectedEquipment = if (it in selectedEquipment) selectedEquipment - it
+                            else selectedEquipment + it
                         }
                     }
                 }
