@@ -159,13 +159,29 @@ private fun LargeRecipeCard(
                     contentScale = ContentScale.Crop,
                 )
 
-                IconButton(
-                    onClick = onToggleFavorite,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(36.dp)
-                ) {
+                    if (recipe.featured) {
+                        Surface(
+                            modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.tertiary,
+                        ) {
+                            Text(
+                                "\u2B50 Destacada",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onTertiary,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = onToggleFavorite,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .size(36.dp)
+                    ) {
                     Surface(
                         shape = RoundedCornerShape(50),
                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),

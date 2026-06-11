@@ -222,6 +222,7 @@ private fun ScaleCalculatorContent() {
 private fun BarcodeScannerContent() {
     val context = LocalContext.current
     var scannedCode by remember { mutableStateOf<String?>(null) }
+    var manualCode by remember { mutableStateOf("") }
 
     val barcodeLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -276,8 +277,27 @@ private fun BarcodeScannerContent() {
             Text(if (scannedCode != null) "Escanear otro" else "Escanear")
         }
 
+        HorizontalDivider()
+        Text("O ingres\u00E1 el c\u00F3digo manualmente", style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                value = manualCode,
+                onValueChange = { manualCode = it.filter { c -> c.isDigit() } },
+                placeholder = { Text("C\u00F3digo de barras") },
+                modifier = Modifier.weight(1f),
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp)
+            )
+            Button(
+                onClick = { if (manualCode.isNotBlank()) scannedCode = manualCode },
+                enabled = manualCode.isNotBlank(),
+                shape = RoundedCornerShape(50)
+            ) { Text("Buscar") }
+        }
+
         if (scannedCode != null) {
-            OutlinedButton(onClick = { scannedCode = null }, shape = RoundedCornerShape(50), modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = { scannedCode = null; manualCode = "" }, shape = RoundedCornerShape(50), modifier = Modifier.fillMaxWidth()) {
                 Text("Limpiar")
             }
         }
