@@ -193,8 +193,8 @@ fun SearchScreen(
                             val isSel = selectedDifficulty == d
                             Surface(
                                 onClick = { selectedDifficulty = if (isSel) null else d },
-                                shape = if (idx == 0) RoundedCornerShape(topStart = 50, bottomStart = 50)
-                                else if (idx == 2) RoundedCornerShape(topEnd = 50, bottomEnd = 50)
+                                shape = if (idx == 0) RoundedCornerShape(topStart = 50.dp, bottomStart = 50.dp)
+                                else if (idx == 2) RoundedCornerShape(topEnd = 50.dp, bottomEnd = 50.dp)
                                 else RoundedCornerShape(0.dp),
                                 color = if (isSel) MaterialTheme.colorScheme.primary
                                 else Color.Transparent,

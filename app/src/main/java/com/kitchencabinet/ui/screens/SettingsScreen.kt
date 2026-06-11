@@ -223,12 +223,12 @@ fun SettingsScreen(
                 Spacer(Modifier.height(12.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NavShortcut(Icons.Filled.Favorite, "Favoritos") { navController?.navigate("favorites") }
-                        NavShortcut(Icons.Filled.ShoppingCart, "Compras") { navController?.navigate("shopping") }
+                        NavShortcut(Icons.Filled.Favorite, "Favoritos", Modifier.weight(1f)) { navController?.navigate("favorites") }
+                        NavShortcut(Icons.Filled.ShoppingCart, "Compras", Modifier.weight(1f)) { navController?.navigate("shopping") }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NavShortcut(Icons.Filled.CalendarMonth, "Plan semanal") { navController?.navigate("mealplan") }
-                        NavShortcut(Icons.Filled.Build, "Herramientas") { navController?.navigate("tools") }
+                        NavShortcut(Icons.Filled.CalendarMonth, "Plan semanal", Modifier.weight(1f)) { navController?.navigate("mealplan") }
+                        NavShortcut(Icons.Filled.Build, "Herramientas", Modifier.weight(1f)) { navController?.navigate("tools") }
                     }
                 }
             }
@@ -297,10 +297,10 @@ private fun SegmentedControl(options: List<SegOption>, selectedValue: String, on
 }
 
 @Composable
-private fun NavShortcut(icon: ImageVector, label: String, onClick: () -> Unit) {
+private fun NavShortcut(icon: ImageVector, label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        modifier = Modifier.weight(1f),
+        modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shadowElevation = 1.dp,
