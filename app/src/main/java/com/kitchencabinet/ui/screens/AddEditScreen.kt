@@ -1,9 +1,11 @@
 package com.kitchencabinet.ui.screens
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -55,10 +57,30 @@ fun AddEditScreen(
     val isEditing = recipeId != null
     val difficulties = listOf("easy", "medium", "hard")
 
+    val context = LocalContext.current
+    var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.toString()?.let { imageUrl = it }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success) {
+            cameraImageUri?.toString()?.let { imageUrl = it }
+        }
+    }
+
+    fun createCameraUri(): Uri {
+        val file = java.io.File(context.cacheDir, "recipe_${System.currentTimeMillis()}.jpg")
+        return androidx.core.content.FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            file
+        )
     }
 
     LaunchedEffect(recipeId) {
@@ -190,6 +212,17 @@ fun AddEditScreen(
                     Icon(Icons.Filled.Image, "Galería", Modifier.size(18.dp))
                     Spacer(Modifier.width(4.dp))
                     Text("Galería", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                }
+                FilledTonalButton(
+                    onClick = {
+                        val uri = createCameraUri()
+                        cameraImageUri = uri
+                        cameraLauncher.launch(uri)
+                    },
+                    modifier = Modifier.height(56.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Filled.CameraAlt, "Cámara", Modifier.size(18.dp))
                 }
             }
 
