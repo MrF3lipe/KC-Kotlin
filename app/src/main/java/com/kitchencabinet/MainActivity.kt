@@ -86,7 +86,8 @@ fun KitchenCabinetApp() {
         }
         composable("tools") {
             ToolsScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onRecipeClick = { id -> navController.navigate("detail/$id") }
             )
         }
         composable(

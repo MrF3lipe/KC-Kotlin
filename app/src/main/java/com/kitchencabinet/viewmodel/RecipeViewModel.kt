@@ -47,6 +47,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     fun setCategory(category: String) { _selectedCategory.value = category }
 
     fun insert(recipe: Recipe) = viewModelScope.launch { repo.insertRecipe(recipe) }
+    suspend fun insertAndGetId(recipe: Recipe): Long = repo.insertRecipe(recipe)
     fun update(recipe: Recipe) = viewModelScope.launch { repo.updateRecipe(recipe) }
     fun delete(recipe: Recipe) = viewModelScope.launch { repo.deleteRecipe(recipe) }
     fun toggleFavorite(id: Int, isFavorite: Boolean) = viewModelScope.launch {

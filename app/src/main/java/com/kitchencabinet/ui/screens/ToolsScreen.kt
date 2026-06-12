@@ -19,11 +19,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kitchencabinet.data.Ingredient
+import com.kitchencabinet.data.Recipe
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
+import com.kitchencabinet.viewmodel.RecipeViewModel
+import kotlinx.coroutines.launch
+import org.json.JSONObject
+import java.util.Base64
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToolsScreen(onBack: () -> Unit) {
+fun ToolsScreen(
+    onBack: () -> Unit,
+    onRecipeClick: (Int) -> Unit = {},
+    viewModel: RecipeViewModel = viewModel()
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,6 +76,14 @@ fun ToolsScreen(onBack: () -> Unit) {
             // Fridge Photo card
             ToolCard(title = "Foto de nevera", icon = Icons.Filled.CameraAlt) {
                 FridgePhotoContent()
+            }
+
+            // Import Recipe card
+            ToolCard(title = "Importar receta", icon = Icons.Filled.FileDownload) {
+                RecipeImportContent(
+                    viewModel = viewModel,
+                    onRecipeClick = onRecipeClick
+                )
             }
 
             Spacer(Modifier.height(16.dp))
@@ -352,6 +371,145 @@ private fun FridgePhotoContent() {
         if (photoUri != null) {
             OutlinedButton(onClick = { photoUri = null }, shape = RoundedCornerShape(50), modifier = Modifier.fillMaxWidth()) {
                 Text("Limpiar")
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecipeImportContent(
+    viewModel: RecipeViewModel,
+    onRecipeClick: (Int) -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    var importUrl by remember { mutableStateOf("") }
+    var previewRecipe by remember { mutableStateOf<Recipe?>(null) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+    var importedId by remember { mutableStateOf<Int?>(null) }
+    var importing by remember { mutableStateOf(false) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(
+            "Pegá un enlace con datos de receta codificados para importarla.",
+            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        OutlinedTextField(
+            value = importUrl,
+            onValueChange = { importUrl = it; previewRecipe = null; errorMsg = null; importedId = null },
+            placeholder = { Text("https://... o kc://import#...") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            trailingIcon = {
+                IconButton(onClick = { importUrl = ""; previewRecipe = null; errorMsg = null; importedId = null }) {
+                    Icon(Icons.Filled.Clear, "Limpiar")
+                }
+            }
+        )
+
+        Button(
+            onClick = {
+                try {
+                    val hash = importUrl.substringAfterLast('#')
+                    if (hash.isBlank()) throw Exception("No se encontró hash en la URL")
+                    val json = try {
+                        String(Base64.getUrlDecoder().decode(hash))
+                    } catch (_: Exception) {
+                        String(Base64.getDecoder().decode(hash))
+                    }
+                    val obj = JSONObject(json)
+                    val recipe = Recipe(
+                        id = 0,
+                        title = obj.optString("title", ""),
+                        description = obj.optString("description", ""),
+                        image = obj.optString("image", ""),
+                        category = obj.optString("category", "General"),
+                        difficulty = obj.optString("difficulty", ""),
+                        ingredients = run {
+                            val arr = obj.optJSONArray("ingredients")
+                            if (arr != null) (0 until arr.length()).map { i ->
+                                val ing = arr.getJSONObject(i)
+                                Ingredient(name = ing.optString("name", ""), quantity = ing.optString("quantity", ""))
+                            } else emptyList()
+                        },
+                        equipment = run {
+                            val arr = obj.optJSONArray("equipment")
+                            if (arr != null) (0 until arr.length()).map { arr.getString(it) } else emptyList()
+                        },
+                        steps = run {
+                            val arr = obj.optJSONArray("steps")
+                            if (arr != null) (0 until arr.length()).map { arr.getString(it) } else emptyList()
+                        },
+                        timeMinutes = obj.optInt("timeMinutes", 30),
+                        servings = obj.optInt("servings", 4),
+                        isFavorite = false,
+                        featured = false,
+                        cookedCount = 0,
+                        rating = 0f
+                    )
+                    if (recipe.title.isBlank()) throw Exception("La receta no tiene título")
+                    previewRecipe = recipe
+                    errorMsg = null
+                } catch (e: Exception) {
+                    errorMsg = e.message ?: "Error al decodificar"
+                    previewRecipe = null
+                }
+            },
+            enabled = importUrl.isNotBlank(),
+            shape = RoundedCornerShape(50),
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Decodificar y previsualizar") }
+
+        if (errorMsg != null) {
+            Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.errorContainer) {
+                Text(errorMsg!!, modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onErrorContainer)
+            }
+        }
+
+        if (previewRecipe != null && importedId == null) {
+            val r = previewRecipe!!
+            Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.primaryContainer) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(r.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(4.dp))
+                    Text("${r.ingredients.size} ingredientes, ${r.steps.size} pasos", style = MaterialTheme.typography.bodySmall)
+                    Spacer(Modifier.height(8.dp))
+                    if (importing) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = {
+                                    importing = true
+                                    scope.launch {
+                                        try {
+                                            val newId = viewModel.insertAndGetId(r).toInt()
+                                            importedId = newId
+                                            onRecipeClick(newId)
+                                        } catch (e: Exception) {
+                                            errorMsg = "Error al importar: ${e.message}"
+                                        } finally {
+                                            importing = false
+                                        }
+                                    }
+                                },
+                                shape = RoundedCornerShape(50)
+                            ) { Text("Importar") }
+                            OutlinedButton(onClick = { previewRecipe = null }, shape = RoundedCornerShape(50)) {
+                                Text("Cancelar")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (importedId != null) {
+            Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
+                Text("¡Receta importada!", modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
             }
         }
     }
