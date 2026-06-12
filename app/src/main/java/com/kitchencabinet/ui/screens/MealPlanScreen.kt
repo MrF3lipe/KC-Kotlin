@@ -182,9 +182,9 @@ fun MealPlanScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                if (!recipe.imageUrl.isNullOrBlank()) {
+                                if (!recipe.image.isNullOrBlank()) {
                                     AsyncImage(
-                                        model = recipe.imageUrl,
+                                        model = recipe.image,
                                         contentDescription = null,
                                         modifier = Modifier.size(40.dp).clip(MaterialTheme.shapes.small),
                                         contentScale = ContentScale.Crop
