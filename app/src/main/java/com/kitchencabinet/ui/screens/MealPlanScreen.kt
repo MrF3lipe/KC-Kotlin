@@ -9,9 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.kitchencabinet.data.MealPlanEntry
 import com.kitchencabinet.viewmodel.MealPlanViewModel
 import com.kitchencabinet.viewmodel.RecipeViewModel
@@ -173,9 +176,23 @@ fun MealPlanScreen(
                                 )
                                 showRecipePicker = false
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
                         ) {
-                            Text(recipe.title)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                if (!recipe.imageUrl.isNullOrBlank()) {
+                                    AsyncImage(
+                                        model = recipe.imageUrl,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(40.dp).clip(MaterialTheme.shapes.small),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                }
+                                Text(recipe.title)
+                            }
                         }
                     }
                 }
