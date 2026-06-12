@@ -343,8 +343,6 @@ fun SearchScreen(
                         }
                     }
                 }
-                    }
-                }
             }
         }
     }
