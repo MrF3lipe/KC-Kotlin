@@ -41,7 +41,7 @@ fun ToolsScreen(
                 title = { Text("Herramientas") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

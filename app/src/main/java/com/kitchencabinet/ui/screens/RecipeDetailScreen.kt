@@ -100,7 +100,7 @@ fun RecipeDetailScreen(
                     scope.launch { viewModel.delete(r); showDeleteDialog = false; onBack() }
                 }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
             },
-            dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") } }
+            dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Cancelar") } }
         )
     }
 
@@ -172,7 +172,7 @@ fun RecipeDetailScreen(
                         Box(modifier = Modifier.padding(8.dp)) {
                             Icon(
                                 Icons.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = "Volver",
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }

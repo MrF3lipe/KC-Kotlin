@@ -109,7 +109,7 @@ fun CookScreen(
                     showTimerDialog = false
                     timerInput = ""
                 }) {
-                    Text("Cancel")
+                    Text("Cancelar")
                 }
             }
         )
@@ -138,7 +138,7 @@ fun CookScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showFinishDialog = false }) {
-                    Text("Cancel")
+                    Text("Cancelar")
                 }
             }
         )
@@ -156,7 +156,7 @@ fun CookScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 actions = {

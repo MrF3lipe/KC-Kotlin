@@ -104,7 +104,7 @@ private fun CompactRecipeCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Schedule,
-                            contentDescription = "Time",
+                            contentDescription = "Tiempo",
                             modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -76,7 +76,7 @@ fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
+                        contentDescription = "Buscar",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )

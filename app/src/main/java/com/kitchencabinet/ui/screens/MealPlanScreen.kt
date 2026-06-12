@@ -40,8 +40,8 @@ fun MealPlanScreen(
 
     val dayNames = remember {
         listOf(
-            "mon" to "Monday", "tue" to "Tuesday", "wed" to "Wednesday",
-            "thu" to "Thursday", "fri" to "Friday", "sat" to "Saturday", "sun" to "Sunday"
+            "mon" to "Lunes", "tue" to "Martes", "wed" to "Miércoles",
+            "thu" to "Jueves", "fri" to "Viernes", "sat" to "Sábado", "sun" to "Domingo"
         )
     }
 
@@ -61,7 +61,7 @@ fun MealPlanScreen(
                 title = { Text("Meal Plan") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
                     }
                 },
                 actions = {
@@ -198,7 +198,7 @@ fun MealPlanScreen(
                 }
             },
             confirmButton = {},
-            dismissButton = { TextButton(onClick = { showRecipePicker = false }) { Text("Cancel") } }
+            dismissButton = { TextButton(onClick = { showRecipePicker = false }) { Text("Cancelar") } }
         )
     }
 }
@@ -237,7 +237,7 @@ private fun MealSlot(
             ) {
                 Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(14.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("Add", style = MaterialTheme.typography.labelSmall)
+                Text("Agregar", style = MaterialTheme.typography.labelSmall)
             }
         }
     }

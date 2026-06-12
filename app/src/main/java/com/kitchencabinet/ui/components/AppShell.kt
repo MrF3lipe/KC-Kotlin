@@ -70,7 +70,7 @@ private fun AppHeader(
                 IconButton(onClick = { navController.navigate("settings") }) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
+                        contentDescription = "Ajustes",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -79,7 +79,7 @@ private fun AppHeader(
                 IconButton(onClick = { navController.navigate("favorites") }) {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = "Favorites",
+                        contentDescription = "Favoritos",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }

@@ -415,7 +415,7 @@ private fun CategoryManagerBottomSheet(
                                 if (editName.isNotBlank()) { onUpdate(cat.copy(name = editName, emoji = editEmoji.ifBlank { null })) }
                                 editingId = null
                             }) { Icon(Icons.Filled.Check, "Save") }
-                            IconButton(onClick = { editingId = null }) { Icon(Icons.Filled.Close, "Cancel") }
+                            IconButton(onClick = { editingId = null }) { Icon(Icons.Filled.Close, "Cancelar") }
                         }
                     } else {
                         Row(
@@ -454,7 +454,7 @@ private fun CategoryManagerBottomSheet(
                                 newName = ""; newEmoji = ""
                             }
                         }, enabled = newName.isNotBlank()) {
-                            Icon(Icons.Filled.Add, "Add", tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Filled.Add, "Agregar", tint = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
