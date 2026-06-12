@@ -19,16 +19,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.data.Recipe
+import com.kitchencabinet.data.ShoppingItem
 import com.kitchencabinet.ui.components.RecipeCard
 import com.kitchencabinet.ui.components.RecipeCardVariant
 import com.kitchencabinet.viewmodel.PantryViewModel
 import com.kitchencabinet.viewmodel.RecipeViewModel
+import com.kitchencabinet.viewmodel.ShoppingViewModel
 
 @Composable
 fun SearchScreen(
     onRecipeClick: (Int) -> Unit,
     viewModel: RecipeViewModel = viewModel(),
     pantryViewModel: PantryViewModel = viewModel(),
+    shoppingViewModel: ShoppingViewModel = viewModel(),
     modifier: Modifier = Modifier,
 ) {
     val query by viewModel.searchQuery.collectAsState()
@@ -56,9 +59,19 @@ fun SearchScreen(
             .distinct().sorted()
     }
 
-    val (cookable, almost, others) = remember(results, selectedIngredients, selectedDifficulty, showCookableOnly, pantryItems, selectedEquipment) {
-        val availablePantry = pantryItems.filter { it.available }
+    val availablePantry = remember(pantryItems) {
+        pantryItems.filter { it.available }
             .map { it.name.lowercase().trim() }.toSet()
+    }
+
+    fun missingIngredients(recipe: Recipe): List<com.kitchencabinet.data.Ingredient> {
+        return recipe.ingredients.filter { ing ->
+            val name = ing.name.lowercase().trim()
+            availablePantry.none { pantryName -> pantryName.contains(name) || name.contains(pantryName) }
+        }
+    }
+
+    val (cookable, almost, others) = remember(results, selectedIngredients, selectedDifficulty, showCookableOnly, pantryItems, selectedEquipment) {
 
         data class MatchResult(val recipe: Recipe, val matchedCount: Int, val totalCount: Int)
 
@@ -281,9 +294,26 @@ fun SearchScreen(
                         GroupHeader("\uD83D\uDFE1 Casi listas", Color(0xFFF57F17), almost.size)
                     }
                     items(almost, key = { "almost_${it.id}" }) { recipe ->
-                        RecipeCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) },
-                            onToggleFavorite = { viewModel.toggleFavorite(recipe.id, !recipe.isFavorite) },
-                            variant = RecipeCardVariant.Compact)
+                        Column {
+                            RecipeCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) },
+                                onToggleFavorite = { viewModel.toggleFavorite(recipe.id, !recipe.isFavorite) },
+                                variant = RecipeCardVariant.Compact)
+                            val missing = missingIngredients(recipe)
+                            if (missing.isNotEmpty()) {
+                                TextButton(
+                                    onClick = {
+                                        missing.forEach { ing ->
+                                            shoppingViewModel.insert(ShoppingItem(name = ing.name, quantity = 1.0, unit = "ud"))
+                                        }
+                                    },
+                                    modifier = Modifier.padding(start = 8.dp)
+                                ) {
+                                    Icon(Icons.Filled.AddShoppingCart, null, Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("A\u00F1adir ${missing.size} faltante${if (missing.size > 1) "s" else ""}", style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                        }
                     }
                 }
                 if (others.isNotEmpty()) {
@@ -291,9 +321,28 @@ fun SearchScreen(
                         GroupHeader("\uD83D\uDCDA Otras", MaterialTheme.colorScheme.onSurfaceVariant, others.size)
                     }
                     items(others, key = { "others_${it.id}" }) { recipe ->
-                        RecipeCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) },
-                            onToggleFavorite = { viewModel.toggleFavorite(recipe.id, !recipe.isFavorite) },
-                            variant = RecipeCardVariant.Compact)
+                        Column {
+                            RecipeCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) },
+                                onToggleFavorite = { viewModel.toggleFavorite(recipe.id, !recipe.isFavorite) },
+                                variant = RecipeCardVariant.Compact)
+                            val missing = missingIngredients(recipe)
+                            if (missing.isNotEmpty()) {
+                                TextButton(
+                                    onClick = {
+                                        missing.forEach { ing ->
+                                            shoppingViewModel.insert(ShoppingItem(name = ing.name, quantity = 1.0, unit = "ud"))
+                                        }
+                                    },
+                                    modifier = Modifier.padding(start = 8.dp)
+                                ) {
+                                    Icon(Icons.Filled.AddShoppingCart, null, Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("A\u00F1adir ${missing.size} faltante${if (missing.size > 1) "s" else ""}", style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                        }
+                    }
+                }
                     }
                 }
             }
