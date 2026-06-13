@@ -22,11 +22,17 @@ interface MealPlanDao {
     @Query("SELECT * FROM meal_plan WHERE recipeId = :recipeId")
     fun getByRecipe(recipeId: Int): Flow<List<MealPlanEntry>>
 
+    @Query("SELECT * FROM meal_plan")
+    suspend fun getAllOnce(): List<MealPlanEntry>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: MealPlanEntry): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(entries: List<MealPlanEntry>)
+
+    @Query("DELETE FROM meal_plan")
+    suspend fun deleteAll()
 
     @Update
     suspend fun update(entry: MealPlanEntry)

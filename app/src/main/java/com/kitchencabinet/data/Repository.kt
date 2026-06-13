@@ -90,4 +90,42 @@ class Repository(
     suspend fun updateNotificationsConfig(config: NotificationsConfig) = notificationsConfigDao.update(config)
     suspend fun setExpiryNotificationsEnabled(enabled: Boolean) = notificationsConfigDao.setExpiryEnabled(enabled)
     suspend fun setExpiryDaysBefore(days: Int) = notificationsConfigDao.setExpiryDaysBefore(days)
+
+    // ── Backup & Restore ────────────────────────────────────
+    data class BackupData(
+        val recipes: List<Recipe>,
+        val pantry: List<PantryItem>,
+        val pantryCategories: List<PantryCategory>,
+        val shopping: List<ShoppingItem>,
+        val mealPlan: List<MealPlanEntry>,
+        val settings: SettingsEntity?,
+        val notificationsConfig: NotificationsConfig?
+    )
+
+    suspend fun exportBackup(): BackupData = BackupData(
+        recipes = recipeDao.getAllOnce(),
+        pantry = pantryDao.getAllOnce(),
+        pantryCategories = pantryCategoryDao.getAllOnce(),
+        shopping = shoppingDao.getAllOnce(),
+        mealPlan = mealPlanDao.getAllOnce(),
+        settings = settingsDao.getOnce(),
+        notificationsConfig = notificationsConfigDao.getOnce()
+    )
+
+    suspend fun importBackup(data: BackupData, clearExisting: Boolean = true) {
+        if (clearExisting) {
+            recipeDao.deleteAll()
+            pantryDao.deleteAll()
+            pantryCategoryDao.deleteAllCategories()
+            shoppingDao.deleteAll()
+            mealPlanDao.deleteAll()
+        }
+        if (data.recipes.isNotEmpty()) recipeDao.insertAll(data.recipes)
+        if (data.pantry.isNotEmpty()) pantryDao.insertAll(data.pantry)
+        if (data.pantryCategories.isNotEmpty()) pantryCategoryDao.insertAll(data.pantryCategories)
+        if (data.shopping.isNotEmpty()) shoppingDao.insertAll(data.shopping)
+        if (data.mealPlan.isNotEmpty()) mealPlanDao.insertAll(data.mealPlan)
+        data.settings?.let { settingsDao.insert(it) }
+        data.notificationsConfig?.let { notificationsConfigDao.insert(it) }
+    }
 }

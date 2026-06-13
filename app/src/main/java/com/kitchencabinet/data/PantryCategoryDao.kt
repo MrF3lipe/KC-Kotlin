@@ -33,4 +33,7 @@ interface PantryCategoryDao {
 
     @Query("DELETE FROM pantry_categories WHERE id = :id")
     suspend fun deleteById(id: Int)
+
+    @Query("DELETE FROM pantry_categories")
+    suspend fun deleteAllCategories()
 }

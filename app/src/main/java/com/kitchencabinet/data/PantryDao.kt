@@ -20,6 +20,15 @@ interface PantryDao {
     @Query("SELECT * FROM pantry_items WHERE available = 1 ORDER BY category ASC, name ASC")
     fun getAvailable(): Flow<List<PantryItem>>
 
+    @Query("SELECT * FROM pantry_items")
+    suspend fun getAllOnce(): List<PantryItem>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(items: List<PantryItem>)
+
+    @Query("DELETE FROM pantry_items")
+    suspend fun deleteAll()
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: PantryItem): Long
 

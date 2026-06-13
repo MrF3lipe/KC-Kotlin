@@ -26,8 +26,17 @@ interface RecipeDao {
     @Query("SELECT * FROM recipes WHERE featured = 1 ORDER BY title ASC")
     fun getFeatured(): Flow<List<Recipe>>
 
+    @Query("SELECT * FROM recipes")
+    suspend fun getAllOnce(): List<Recipe>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(recipe: Recipe): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(recipes: List<Recipe>)
+
+    @Query("DELETE FROM recipes")
+    suspend fun deleteAll()
 
     @Update
     suspend fun update(recipe: Recipe)

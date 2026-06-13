@@ -14,11 +14,17 @@ interface ShoppingDao {
     @Query("SELECT * FROM shopping_items WHERE fromRecipeId = :recipeId")
     fun getByRecipeId(recipeId: Int): Flow<List<ShoppingItem>>
 
+    @Query("SELECT * FROM shopping_items")
+    suspend fun getAllOnce(): List<ShoppingItem>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: ShoppingItem): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(items: List<ShoppingItem>)
+
+    @Query("DELETE FROM shopping_items")
+    suspend fun deleteAll()
 
     @Update
     suspend fun update(item: ShoppingItem)
