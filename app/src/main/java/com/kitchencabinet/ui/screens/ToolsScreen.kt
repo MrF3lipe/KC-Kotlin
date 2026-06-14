@@ -5,6 +5,9 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -249,18 +252,15 @@ private fun BarcodeScannerContent(strings: com.kitchencabinet.ui.i18n.Strings) {
     val context = LocalContext.current
     var scannedCode by remember { mutableStateOf<String?>(null) }
     var manualCode by remember { mutableStateOf("") }
+    var scanning by remember { mutableStateOf(false) }
 
-    val barcodeLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
-            val code = result.data?.extras?.getString("code")
-            if (code != null) scannedCode = code
-        }
+    val options = remember {
+        GmsBarcodeScannerOptions.Builder()
+            .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
+            .build()
     }
-    val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { bitmap -> if (bitmap != null) scannedCode = "C\u00F3digo detectado" }
+
+    val scanner = remember { GmsBarcodeScanning.getClient(context, options) }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
@@ -274,7 +274,9 @@ private fun BarcodeScannerContent(strings: com.kitchencabinet.ui.i18n.Strings) {
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                if (scannedCode != null) {
+                if (scanning) {
+                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                } else if (scannedCode != null) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Filled.CheckCircle, null, Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.height(4.dp))
@@ -293,9 +295,16 @@ private fun BarcodeScannerContent(strings: com.kitchencabinet.ui.i18n.Strings) {
 
         Button(
             onClick = {
-                try { barcodeLauncher.launch(Intent("com.google.zxing.client.android.SCAN").apply { putExtra("SCAN_MODE", "PRODUCT_MODE") }) }
-                catch (_: Exception) { cameraLauncher.launch(null) }
+                scanning = true
+                scanner.startScan()
+                    .addOnSuccessListener { barcode ->
+                        scannedCode = barcode.rawValue ?: barcode.displayValue
+                        scanning = false
+                    }
+                    .addOnCanceledListener { scanning = false }
+                    .addOnFailureListener { scanning = false }
             },
+            enabled = !scanning,
             shape = RoundedCornerShape(50), modifier = Modifier.fillMaxWidth()
         ) {
             Icon(Icons.Filled.QrCodeScanner, null, Modifier.size(18.dp))
@@ -322,7 +331,7 @@ private fun BarcodeScannerContent(strings: com.kitchencabinet.ui.i18n.Strings) {
             ) { Text(strings.tools.search) }
         }
 
-        if (scannedCode != null) {
+        if (scannedCode != null && !scanning) {
             OutlinedButton(onClick = { scannedCode = null; manualCode = "" }, shape = RoundedCornerShape(50), modifier = Modifier.fillMaxWidth()) {
                 Text(strings.tools.clear)
             }
