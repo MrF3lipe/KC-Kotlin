@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.data.Recipe
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.RecipeViewModel
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +42,7 @@ fun ShareScreen(
     onBack: () -> Unit,
     viewModel: RecipeViewModel = viewModel(),
 ) {
+    val strings = LocalStrings.current
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var recipe by remember { mutableStateOf<Recipe?>(null) }
@@ -66,10 +68,10 @@ fun ShareScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Compartir receta") },
+                title = { Text(strings.share.title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = strings.nav.search)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -110,13 +112,13 @@ fun ShareScreen(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
                 ) {
                     Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Código QR", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
+                        Text(strings.share.qrCode, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
                             fontFamily = NewsreaderFontFamily, color = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.height(8.dp))
                         if (qrBitmap != null) {
                             androidx.compose.foundation.Image(
                                 bitmap = qrBitmap!!.asImageBitmap(),
-                                contentDescription = "QR de la receta",
+                                contentDescription = strings.share.shareImageDesc,
                                 modifier = Modifier.size(180.dp)
                             )
                             Spacer(Modifier.height(8.dp))
@@ -130,13 +132,13 @@ fun ShareScreen(
                                         putExtra(Intent.EXTRA_STREAM, uri)
                                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     }
-                                    context.startActivity(Intent.createChooser(intent, "Compartir QR"))
+                                    context.startActivity(Intent.createChooser(intent, strings.share.shareQrChooser))
                                 },
                                 shape = RoundedCornerShape(50)
                             ) {
                                 Icon(Icons.Filled.Share, null, Modifier.size(18.dp))
                                 Spacer(Modifier.width(8.dp))
-                                Text("Compartir QR")
+                                Text(strings.share.shareQr)
                             }
                         } else {
                             CircularProgressIndicator(modifier = Modifier.size(32.dp))
@@ -151,11 +153,11 @@ fun ShareScreen(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Compartir como imagen", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
+                        Text(strings.share.shareImage, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
                             fontFamily = NewsreaderFontFamily, color = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            "Generá una tarjeta de receta con todos los ingredientes y pasos.",
+                            strings.share.shareImageDesc,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -163,7 +165,7 @@ fun ShareScreen(
                         if (shareImageBitmap != null) {
                             androidx.compose.foundation.Image(
                                 bitmap = shareImageBitmap!!.asImageBitmap(),
-                                contentDescription = "Vista previa",
+                                contentDescription = strings.share.shareImageDesc,
                                 modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp)
                             )
                             Spacer(Modifier.height(8.dp))
@@ -184,7 +186,7 @@ fun ShareScreen(
                                     }
                                     withContext(Dispatchers.Main) {
                                         sharingImage = false
-                                        context.startActivity(Intent.createChooser(intent, "Compartir imagen"))
+                                        context.startActivity(Intent.createChooser(intent, strings.share.shareImageChooser))
                                     }
                                 }
                             },
@@ -198,7 +200,7 @@ fun ShareScreen(
                                 Icon(Icons.Filled.Image, null, Modifier.size(18.dp))
                             }
                             Spacer(Modifier.width(8.dp))
-                            Text(if (sharingImage) "Generando..." else "Generar y compartir")
+                            Text(if (sharingImage) strings.share.generating else strings.share.generateShare)
                         }
                     }
                 }
@@ -210,21 +212,21 @@ fun ShareScreen(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Compartir como texto", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
+                        Text(strings.share.shareText, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
                             fontFamily = NewsreaderFontFamily, color = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.height(8.dp))
                         val shareText = buildString {
                             appendLine(r.title)
                             appendLine()
-                            appendLine("Categoría: ${r.category}")
-                            if (r.difficulty.isNotBlank()) appendLine("Dificultad: ${r.difficulty}")
-                            appendLine("Tiempo: ${r.timeMinutes} min")
-                            appendLine("Porciones: ${r.servings}")
+                            appendLine("${strings.share.category} ${r.category}")
+                            if (r.difficulty.isNotBlank()) appendLine("${strings.share.difficulty} ${r.difficulty}")
+                            appendLine("${strings.share.time} ${r.timeMinutes} min")
+                            appendLine("${strings.share.servings} ${r.servings}")
                             appendLine()
-                            appendLine("Ingredientes:")
+                            appendLine(strings.share.ingredients)
                             r.ingredients.forEach { appendLine("- ${it.quantity} ${it.name}".trimStart()) }
                             appendLine()
-                            appendLine("Pasos:")
+                            appendLine(strings.share.steps)
                             r.steps.forEachIndexed { i, step -> appendLine("${i + 1}. $step") }
                         }
                         Text(
@@ -241,14 +243,14 @@ fun ShareScreen(
                                     putExtra(Intent.EXTRA_SUBJECT, r.title)
                                     putExtra(Intent.EXTRA_TEXT, shareText)
                                 }
-                                context.startActivity(Intent.createChooser(intent, "Compartir receta"))
+                                context.startActivity(Intent.createChooser(intent, strings.share.shareRecipeChooser))
                             },
                             shape = RoundedCornerShape(50),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(Icons.Filled.Share, null, Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text("Compartir vía...")
+                            Text(strings.share.shareVia)
                         }
                     }
                 }
@@ -260,7 +262,7 @@ fun ShareScreen(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Compartir como enlace", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
+                        Text(strings.share.shareLink, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
                             fontFamily = NewsreaderFontFamily, color = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
@@ -278,13 +280,13 @@ fun ShareScreen(
                                 }) {
                                     Icon(
                                         if (copied) Icons.Filled.Check else Icons.Filled.ContentCopy,
-                                        contentDescription = "Copiar"
+                                        contentDescription = strings.share.copied
                                     )
                                 }
                             }
                         )
                         if (copied) {
-                            Text("¡Copiado!", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                            Text(strings.share.copied, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }

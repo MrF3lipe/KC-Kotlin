@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.data.Ingredient
 import com.kitchencabinet.data.Recipe
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.RecipeViewModel
 import kotlinx.coroutines.launch
@@ -35,13 +36,14 @@ fun ToolsScreen(
     onRecipeClick: (Int) -> Unit = {},
     viewModel: RecipeViewModel = viewModel()
 ) {
+    val strings = LocalStrings.current
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Herramientas") },
+                title = { Text(strings.tools.title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = strings.nav.search)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -59,30 +61,31 @@ fun ToolsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Unit Converter card
-            ToolCard(title = "Conversor de unidades", icon = Icons.Filled.SwapHoriz) {
-                UnitConverterContent()
+            ToolCard(title = strings.tools.unitConverter, icon = Icons.Filled.SwapHoriz) {
+                UnitConverterContent(strings = strings)
             }
 
             // Scale Calculator card
-            ToolCard(title = "Escalar receta", icon = Icons.Filled.Calculate) {
-                ScaleCalculatorContent()
+            ToolCard(title = strings.tools.scaleRecipe, icon = Icons.Filled.Calculate) {
+                ScaleCalculatorContent(strings = strings)
             }
 
             // Barcode Scanner card
-            ToolCard(title = "Esc\u00E1ner de c\u00F3digo", icon = Icons.Filled.QrCodeScanner) {
-                BarcodeScannerContent()
+            ToolCard(title = strings.tools.barcodeScanner, icon = Icons.Filled.QrCodeScanner) {
+                BarcodeScannerContent(strings = strings)
             }
 
             // Fridge Photo card
-            ToolCard(title = "Foto de nevera", icon = Icons.Filled.CameraAlt) {
-                FridgePhotoContent()
+            ToolCard(title = strings.tools.fridgePhoto, icon = Icons.Filled.CameraAlt) {
+                FridgePhotoContent(strings = strings)
             }
 
             // Import Recipe card
-            ToolCard(title = "Importar receta", icon = Icons.Filled.FileDownload) {
+            ToolCard(title = strings.tools.importRecipe, icon = Icons.Filled.FileDownload) {
                 RecipeImportContent(
                     viewModel = viewModel,
-                    onRecipeClick = onRecipeClick
+                    onRecipeClick = onRecipeClick,
+                    strings = strings
                 )
             }
 
@@ -123,7 +126,7 @@ private fun ToolCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun UnitConverterContent() {
+private fun UnitConverterContent(strings: com.kitchencabinet.ui.i18n.Strings) {
     var inputValue by remember { mutableStateOf("") }
     var fromUnit by remember { mutableStateOf("cup") }
     var toUnit by remember { mutableStateOf("ml") }
@@ -141,7 +144,7 @@ private fun UnitConverterContent() {
         OutlinedTextField(
             value = inputValue,
             onValueChange = { inputValue = it.filter { c -> c.isDigit() || c == '.' } },
-            label = { Text("Valor") },
+            label = { Text(strings.tools.value) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.fillMaxWidth(), singleLine = true,
             shape = RoundedCornerShape(12.dp)
@@ -150,7 +153,7 @@ private fun UnitConverterContent() {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ExposedDropdownMenuBox(expanded = fromExpanded, onExpandedChange = { fromExpanded = !fromExpanded },
                 modifier = Modifier.weight(1f)) {
-                OutlinedTextField(value = fromUnit, onValueChange = {}, readOnly = true, label = { Text("De") },
+                OutlinedTextField(value = fromUnit, onValueChange = {}, readOnly = true, label = { Text(strings.tools.from) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = fromExpanded) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp))
                 ExposedDropdownMenu(expanded = fromExpanded, onDismissRequest = { fromExpanded = false }) {
@@ -161,7 +164,7 @@ private fun UnitConverterContent() {
             }
             ExposedDropdownMenuBox(expanded = toExpanded, onExpandedChange = { toExpanded = !toExpanded },
                 modifier = Modifier.weight(1f)) {
-                OutlinedTextField(value = toUnit, onValueChange = {}, readOnly = true, label = { Text("A") },
+                OutlinedTextField(value = toUnit, onValueChange = {}, readOnly = true, label = { Text(strings.tools.to) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = toExpanded) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp))
                 ExposedDropdownMenu(expanded = toExpanded, onDismissRequest = { toExpanded = false }) {
@@ -178,12 +181,16 @@ private fun UnitConverterContent() {
                 if (value != null && conversions.containsKey(fromUnit) && conversions.containsKey(toUnit)) {
                     val inMl = value * (conversions[fromUnit] ?: 1.0)
                     val converted = inMl / (conversions[toUnit] ?: 1.0)
-                    result = "$value $fromUnit = ${String.format("%.2f", converted)} $toUnit"
+                    result = strings.tools.result
+                        .replace("{value}", "$value")
+                        .replace("{fromUnit}", fromUnit)
+                        .replace("{result}", String.format("%.2f", converted))
+                        .replace("{toUnit}", toUnit)
                 }
             },
             enabled = inputValue.isNotBlank(),
             shape = RoundedCornerShape(50)
-        ) { Text("Convertir") }
+        ) { Text(strings.tools.convert) }
 
         if (result != null) {
             Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.primaryContainer) {
@@ -196,21 +203,21 @@ private fun UnitConverterContent() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScaleCalculatorContent() {
+private fun ScaleCalculatorContent(strings: com.kitchencabinet.ui.i18n.Strings) {
     var originalServings by remember { mutableStateOf("") }
     var desiredServings by remember { mutableStateOf("") }
     var result by remember { mutableStateOf<String?>(null) }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
-            "Ajust\u00E1 las cantidades para diferentes porciones.",
+            strings.tools.scaleDesc,
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         OutlinedTextField(value = originalServings, onValueChange = { originalServings = it.filter { c -> c.isDigit() } },
-            label = { Text("Porciones originales") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
+            label = { Text(strings.tools.originalServings) }, modifier = Modifier.fillMaxWidth(), singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), shape = RoundedCornerShape(12.dp))
         OutlinedTextField(value = desiredServings, onValueChange = { desiredServings = it.filter { c -> c.isDigit() } },
-            label = { Text("Porciones deseadas") }, modifier = Modifier.fillMaxWidth(), singleLine = true,
+            label = { Text(strings.tools.desiredServings) }, modifier = Modifier.fillMaxWidth(), singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), shape = RoundedCornerShape(12.dp))
         Button(
             onClick = {
@@ -218,15 +225,15 @@ private fun ScaleCalculatorContent() {
                 val desired = desiredServings.toIntOrNull()
                 if (original != null && desired != null && original > 0) {
                     val factor = desired.toDouble() / original.toDouble()
-                    result = "Factor de escala: ${String.format("%.2f", factor)}"
-                } else result = "Ingres\u00E1 n\u00FAmeros v\u00E1lidos."
+                    result = strings.tools.scaleFactor.replace("{factor}", String.format("%.2f", factor))
+                } else result = strings.tools.invalidNumbers
             },
             enabled = originalServings.isNotBlank() && desiredServings.isNotBlank(),
             shape = RoundedCornerShape(50), modifier = Modifier.fillMaxWidth()
         ) {
             Icon(Icons.Filled.Calculate, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Calcular")
+            Text(strings.tools.calculate)
         }
         if (result != null) {
             Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.primaryContainer) {
@@ -238,7 +245,7 @@ private fun ScaleCalculatorContent() {
 }
 
 @Composable
-private fun BarcodeScannerContent() {
+private fun BarcodeScannerContent(strings: com.kitchencabinet.ui.i18n.Strings) {
     val context = LocalContext.current
     var scannedCode by remember { mutableStateOf<String?>(null) }
     var manualCode by remember { mutableStateOf("") }
@@ -257,7 +264,7 @@ private fun BarcodeScannerContent() {
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
-            "Escanear c\u00F3digos de barras para agregar ingredientes autom\u00E1ticamente.",
+            strings.tools.scannerDesc,
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
@@ -277,7 +284,7 @@ private fun BarcodeScannerContent() {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Filled.QrCodeScanner, null, Modifier.size(40.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.height(4.dp))
-                        Text("Apunt\u00E1 la c\u00E1mara a un c\u00F3digo", style = MaterialTheme.typography.bodySmall,
+                        Text(strings.tools.scannerHint, style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
@@ -293,17 +300,17 @@ private fun BarcodeScannerContent() {
         ) {
             Icon(Icons.Filled.QrCodeScanner, null, Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text(if (scannedCode != null) "Escanear otro" else "Escanear")
+            Text(if (scannedCode != null) strings.tools.scanAgain else strings.tools.scan)
         }
 
         HorizontalDivider()
-        Text("O ingres\u00E1 el c\u00F3digo manualmente", style = MaterialTheme.typography.bodySmall,
+        Text(strings.tools.manualCode, style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
                 value = manualCode,
                 onValueChange = { manualCode = it.filter { c -> c.isDigit() } },
-                placeholder = { Text("C\u00F3digo de barras") },
+                placeholder = { Text(strings.tools.codePlaceholder) },
                 modifier = Modifier.weight(1f),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp)
@@ -312,19 +319,19 @@ private fun BarcodeScannerContent() {
                 onClick = { if (manualCode.isNotBlank()) scannedCode = manualCode },
                 enabled = manualCode.isNotBlank(),
                 shape = RoundedCornerShape(50)
-            ) { Text("Buscar") }
+            ) { Text(strings.tools.search) }
         }
 
         if (scannedCode != null) {
             OutlinedButton(onClick = { scannedCode = null; manualCode = "" }, shape = RoundedCornerShape(50), modifier = Modifier.fillMaxWidth()) {
-                Text("Limpiar")
+                Text(strings.tools.clear)
             }
         }
     }
 }
 
 @Composable
-private fun FridgePhotoContent() {
+private fun FridgePhotoContent(strings: com.kitchencabinet.ui.i18n.Strings) {
     var photoUri by remember { mutableStateOf<String?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
@@ -332,7 +339,7 @@ private fun FridgePhotoContent() {
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
-            "Sac\u00E1 una foto de tu nevera para detectar ingredientes.",
+            strings.tools.fridgeDesc,
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
@@ -352,7 +359,7 @@ private fun FridgePhotoContent() {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Filled.CameraAlt, null, Modifier.size(40.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.height(4.dp))
-                        Text("Foto del contenido de la nevera", style = MaterialTheme.typography.bodySmall,
+                        Text(strings.tools.fridgeHint, style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
@@ -365,12 +372,12 @@ private fun FridgePhotoContent() {
         ) {
             Icon(Icons.Filled.CameraAlt, null, Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
-            Text(if (photoUri != null) "Re-tomar" else "Abrir c\u00E1mara")
+            Text(if (photoUri != null) strings.tools.retake else strings.tools.openCamera)
         }
 
         if (photoUri != null) {
             OutlinedButton(onClick = { photoUri = null }, shape = RoundedCornerShape(50), modifier = Modifier.fillMaxWidth()) {
-                Text("Limpiar")
+                Text(strings.tools.clear)
             }
         }
     }
@@ -379,7 +386,8 @@ private fun FridgePhotoContent() {
 @Composable
 private fun RecipeImportContent(
     viewModel: RecipeViewModel,
-    onRecipeClick: (Int) -> Unit
+    onRecipeClick: (Int) -> Unit,
+    strings: com.kitchencabinet.ui.i18n.Strings,
 ) {
     val scope = rememberCoroutineScope()
     var importUrl by remember { mutableStateOf("") }
@@ -390,20 +398,20 @@ private fun RecipeImportContent(
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
-            "Pegá un enlace con datos de receta codificados para importarla.",
+            strings.tools.importDesc,
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         OutlinedTextField(
             value = importUrl,
             onValueChange = { importUrl = it; previewRecipe = null; errorMsg = null; importedId = null },
-            placeholder = { Text("https://... o kc://import#...") },
+            placeholder = { Text(strings.tools.importPlaceholder) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
             trailingIcon = {
                 IconButton(onClick = { importUrl = ""; previewRecipe = null; errorMsg = null; importedId = null }) {
-                    Icon(Icons.Filled.Clear, "Limpiar")
+                    Icon(Icons.Filled.Clear, strings.tools.clean)
                 }
             }
         )
@@ -412,7 +420,7 @@ private fun RecipeImportContent(
             onClick = {
                 try {
                     val hash = importUrl.substringAfterLast('#')
-                    if (hash.isBlank()) throw Exception("No se encontró hash en la URL")
+                    if (hash.isBlank()) throw Exception(strings.tools.noHashError)
                     val json = try {
                         String(Base64.getUrlDecoder().decode(hash))
                     } catch (_: Exception) {
@@ -448,18 +456,18 @@ private fun RecipeImportContent(
                         cookedCount = 0,
                         rating = 0f
                     )
-                    if (recipe.title.isBlank()) throw Exception("La receta no tiene título")
+                    if (recipe.title.isBlank()) throw Exception(strings.tools.noTitleError)
                     previewRecipe = recipe
                     errorMsg = null
                 } catch (e: Exception) {
-                    errorMsg = e.message ?: "Error al decodificar"
+                    errorMsg = e.message ?: strings.tools.decodeError
                     previewRecipe = null
                 }
             },
             enabled = importUrl.isNotBlank(),
             shape = RoundedCornerShape(50),
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Decodificar y previsualizar") }
+        ) { Text(strings.tools.decodePreview) }
 
         if (errorMsg != null) {
             Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.errorContainer) {
@@ -474,7 +482,10 @@ private fun RecipeImportContent(
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(r.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(4.dp))
-                    Text("${r.ingredients.size} ingredientes, ${r.steps.size} pasos", style = MaterialTheme.typography.bodySmall)
+                    Text(strings.tools.previewCount
+                        .replace("{ingredients}", "${r.ingredients.size}")
+                        .replace("{steps}", "${r.steps.size}"),
+                        style = MaterialTheme.typography.bodySmall)
                     Spacer(Modifier.height(8.dp))
                     if (importing) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
@@ -496,9 +507,9 @@ private fun RecipeImportContent(
                                     }
                                 },
                                 shape = RoundedCornerShape(50)
-                            ) { Text("Importar") }
+                            ) { Text(strings.tools.importButton) }
                             OutlinedButton(onClick = { previewRecipe = null }, shape = RoundedCornerShape(50)) {
-                                Text("Cancelar")
+                                Text(strings.tools.cancel)
                             }
                         }
                     }
@@ -508,7 +519,7 @@ private fun RecipeImportContent(
 
         if (importedId != null) {
             Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
-                Text("¡Receta importada!", modifier = Modifier.padding(12.dp),
+                Text(strings.tools.importSuccess, modifier = Modifier.padding(12.dp),
                     style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
             }
         }

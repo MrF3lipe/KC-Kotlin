@@ -22,6 +22,7 @@ import com.kitchencabinet.data.Recipe
 import com.kitchencabinet.data.ShoppingItem
 import com.kitchencabinet.ui.components.RecipeCard
 import com.kitchencabinet.ui.components.RecipeCardVariant
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.viewmodel.PantryViewModel
 import com.kitchencabinet.viewmodel.RecipeViewModel
 import com.kitchencabinet.viewmodel.ShoppingViewModel
@@ -34,6 +35,7 @@ fun SearchScreen(
     shoppingViewModel: ShoppingViewModel = viewModel(),
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val query by viewModel.searchQuery.collectAsState()
     val results by viewModel.recipes.collectAsState()
     val pantryItems by pantryViewModel.pantryItems.collectAsState()
@@ -111,7 +113,7 @@ fun SearchScreen(
         ) {
             // Title
             Text(
-                text = "Buscar recetas",
+                text = strings.search.title,
                 style = MaterialTheme.typography.displaySmall,
                 fontFamily = com.kitchencabinet.ui.theme.NewsreaderFontFamily,
                 fontWeight = FontWeight.SemiBold,
@@ -122,13 +124,13 @@ fun SearchScreen(
             OutlinedTextField(
                 value = query,
                 onValueChange = { viewModel.setSearchQuery(it) },
-                placeholder = { Text("Buscar recetas\u2026") },
+                placeholder = { Text(strings.search.placeholder) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 trailingIcon = if (query.isNotEmpty()) ({
                     IconButton(onClick = { viewModel.setSearchQuery("") }) {
-                        Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                        Icon(Icons.Filled.Clear, contentDescription = strings.tools.clear)
                     }
                 }) else null,
                 shape = RoundedCornerShape(50),
@@ -166,12 +168,12 @@ fun SearchScreen(
                         Spacer(Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "Solo cocinables",
+                                strings.search.cookableToggle,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                "Con lo que ten\u00E9s en tu despensa",
+                                strings.search.cookableSubtitle,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -187,10 +189,10 @@ fun SearchScreen(
             // ── Ingredients section ──────────────────────────────────────────────
             if (ingredientOptions.isNotEmpty()) {
                 item(key = "ingredients_header") {
-                    SectionCard(title = "Ingredientes que tengo") {
+                    SectionCard(title = strings.search.ingredientsIHave) {
                         if (selectedIngredients.isNotEmpty()) {
                             Text(
-                                "${selectedIngredients.size} seleccionados",
+                                strings.search.selectedCount.replace("{count}", "${selectedIngredients.size}"),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(bottom = 8.dp)
@@ -207,7 +209,7 @@ fun SearchScreen(
             // ── Equipment section ──────────────────────────────────────────────
             if (equipmentOptions.isNotEmpty()) {
                 item(key = "equipment_header") {
-                    SectionCard(title = "Utensilios") {
+                    SectionCard(title = strings.search.utensils) {
                         ChipGrid(chips = equipmentOptions, selected = selectedEquipment) {
                             selectedEquipment = if (it in selectedEquipment) selectedEquipment - it
                             else selectedEquipment + it
@@ -218,7 +220,7 @@ fun SearchScreen(
 
             // ── Difficulty section ──────────────────────────────────────────────
             item(key = "difficulty_header") {
-                SectionCard(title = "Dificultad") {
+                SectionCard(title = strings.search.difficulty) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(0.dp)
@@ -236,9 +238,9 @@ fun SearchScreen(
                             ) {
                                 Text(
                                     text = when (d) {
-                                        "easy" -> "F\u00E1cil"
-                                        "medium" -> "Media"
-                                        else -> "Dif\u00EDcil"
+                                        "easy" -> strings.search.easy
+                                        "medium" -> strings.search.medium
+                                        else -> strings.search.hard
                                     },
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
@@ -262,7 +264,7 @@ fun SearchScreen(
                 item(key = "empty_state") {
                     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp), contentAlignment = Alignment.Center) {
                         Text(
-                            "Escrib\u00ED para buscar recetas",
+                            strings.search.emptyHint,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -272,7 +274,7 @@ fun SearchScreen(
                 item(key = "no_results") {
                     Box(modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp), contentAlignment = Alignment.Center) {
                         Text(
-                            "Sin resultados para \"$query\"",
+                            strings.search.noResults.replace("{query}", query),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -281,7 +283,7 @@ fun SearchScreen(
             } else {
                 if (cookable.isNotEmpty()) {
                     item(key = "header_cookable") {
-                        GroupHeader("\u2705 Puedes cocinar", Color(0xFF2E7D32), cookable.size)
+                        GroupHeader(strings.search.groupCookable, Color(0xFF2E7D32), cookable.size)
                     }
                     items(cookable, key = { "cookable_${it.id}" }) { recipe ->
                         RecipeCard(recipe = recipe, onClick = { onRecipeClick(recipe.id) },
@@ -291,7 +293,7 @@ fun SearchScreen(
                 }
                 if (almost.isNotEmpty()) {
                     item(key = "header_almost") {
-                        GroupHeader("\uD83D\uDFE1 Casi listas", Color(0xFFF57F17), almost.size)
+                        GroupHeader(strings.search.groupAlmost, Color(0xFFF57F17), almost.size)
                     }
                     items(almost, key = { "almost_${it.id}" }) { recipe ->
                         Column {
@@ -310,7 +312,7 @@ fun SearchScreen(
                                 ) {
                                     Icon(Icons.Filled.AddShoppingCart, null, Modifier.size(16.dp))
                                     Spacer(Modifier.width(4.dp))
-                                    Text("A\u00F1adir ${missing.size} faltante${if (missing.size > 1) "s" else ""}", style = MaterialTheme.typography.labelSmall)
+                                    Text(strings.search.addMissingCount.replace("{count}", "${missing.size}"), style = MaterialTheme.typography.labelSmall)
                                 }
                             }
                         }
@@ -318,7 +320,7 @@ fun SearchScreen(
                 }
                 if (others.isNotEmpty()) {
                     item(key = "header_others") {
-                        GroupHeader("\uD83D\uDCDA Otras", MaterialTheme.colorScheme.onSurfaceVariant, others.size)
+                        GroupHeader(strings.search.groupOthers, MaterialTheme.colorScheme.onSurfaceVariant, others.size)
                     }
                     items(others, key = { "others_${it.id}" }) { recipe ->
                         Column {
@@ -337,7 +339,7 @@ fun SearchScreen(
                                 ) {
                                     Icon(Icons.Filled.AddShoppingCart, null, Modifier.size(16.dp))
                                     Spacer(Modifier.width(4.dp))
-                                    Text("A\u00F1adir ${missing.size} faltante${if (missing.size > 1) "s" else ""}", style = MaterialTheme.typography.labelSmall)
+                                    Text(strings.search.addMissingCount.replace("{count}", "${missing.size}"), style = MaterialTheme.typography.labelSmall)
                                 }
                             }
                         }

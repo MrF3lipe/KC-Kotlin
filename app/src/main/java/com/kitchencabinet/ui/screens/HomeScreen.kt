@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.ui.components.RecipeCard
 import com.kitchencabinet.ui.components.RecipeCardVariant
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.RecipeViewModel
 
@@ -29,6 +30,7 @@ fun HomeScreen(
     viewModel: RecipeViewModel = viewModel(),
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val recipes by viewModel.recipes.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
@@ -48,10 +50,9 @@ fun HomeScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Title: "¿Qué cocinamos hoy?"
         item {
             Text(
-                text = "\u00BFQu\u00E9 cocinamos hoy?",
+                text = strings.home.title,
                 style = MaterialTheme.typography.displaySmall,
                 fontFamily = NewsreaderFontFamily,
                 fontWeight = FontWeight.SemiBold,
@@ -59,7 +60,6 @@ fun HomeScreen(
             )
         }
 
-        // Search bar — pill style
         item {
             Surface(
                 shape = RoundedCornerShape(50),
@@ -76,7 +76,7 @@ fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Buscar",
+                        contentDescription = strings.nav.search,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
@@ -85,7 +85,7 @@ fun HomeScreen(
                         onValueChange = { searchQuery = it },
                         placeholder = {
                             Text(
-                                "Buscar recetas\u2026",
+                                strings.home.placeholder,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -104,7 +104,6 @@ fun HomeScreen(
             }
         }
 
-        // Category chips
         item {
             Row(
                 modifier = Modifier
@@ -148,7 +147,6 @@ fun HomeScreen(
             }
         }
 
-        // Recipes list or empty state
         if (filteredRecipes.isEmpty()) {
             item {
                 Box(
@@ -158,8 +156,8 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (searchQuery.isNotBlank()) "No se encontraron resultados"
-                        else "Todav\u00EDa no hay recetas. \u00A1Agreg\u00E1 una!",
+                        text = if (searchQuery.isNotBlank()) strings.home.emptyTitle
+                        else strings.home.emptySubtitle,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

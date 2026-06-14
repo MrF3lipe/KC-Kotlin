@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,10 +23,12 @@ fun AppShell(
     showNav: Boolean = true,
     content: @Composable (PaddingValues) -> Unit
 ) {
+    val strings = LocalStrings.current
+
     Scaffold(
         topBar = {
             if (showHeader) {
-                AppHeader(title = title, navController = navController)
+                AppHeader(title = title, navController = navController, strings = strings)
             }
         },
         bottomBar = {
@@ -48,7 +51,8 @@ fun AppShell(
 @Composable
 private fun AppHeader(
     title: String,
-    navController: NavController
+    navController: NavController,
+    strings: com.kitchencabinet.ui.i18n.Strings
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -70,7 +74,7 @@ private fun AppHeader(
                 IconButton(onClick = { navController.navigate("settings") }) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Ajustes",
+                        contentDescription = strings.appShell.settingsContentDesc,
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -79,7 +83,7 @@ private fun AppHeader(
                 IconButton(onClick = { navController.navigate("favorites") }) {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = "Favoritos",
+                        contentDescription = strings.appShell.favoritesContentDesc,
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }

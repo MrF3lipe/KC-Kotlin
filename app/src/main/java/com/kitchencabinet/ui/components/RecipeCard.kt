@@ -104,7 +104,7 @@ private fun CompactRecipeCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Schedule,
-                            contentDescription = "Tiempo",
+                            contentDescription = null,
                             modifier = Modifier.size(14.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -141,6 +141,8 @@ private fun LargeRecipeCard(
     onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = com.kitchencabinet.ui.i18n.LocalStrings.current
+
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -166,7 +168,7 @@ private fun LargeRecipeCard(
                             color = MaterialTheme.colorScheme.tertiary,
                         ) {
                             Text(
-                                "\u2B50 Destacada",
+                                strings.recipeCard.featured,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onTertiary,
@@ -281,7 +283,7 @@ private fun LargeRecipeCard(
                     )
                 ) {
                     Text(
-                        text = "VIEW RECIPE",
+                        text = strings.recipeCard.viewRecipe,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 2.sp,

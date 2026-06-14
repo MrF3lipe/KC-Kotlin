@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.LocalDarkMode
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.SettingsViewModel
 
@@ -33,6 +34,7 @@ fun SettingsScreen(
     navController: androidx.navigation.NavController? = null,
     viewModel: SettingsViewModel = viewModel()
 ) {
+    val strings = LocalStrings.current
     val darkMode = LocalDarkMode.current
     val settings by viewModel.settings.collectAsState()
     val notificationsConfig by viewModel.notificationsConfig.collectAsState()
@@ -52,10 +54,10 @@ fun SettingsScreen(
         LaunchedEffect(Unit) { viewModel.exportBackup { json -> exportedJson = json } }
         AlertDialog(
             onDismissRequest = { showExportDialog = false },
-            title = { Text("Exportar respaldo") },
+            title = { Text(strings.settings.exportDialogTitle) },
             text = {
                 Column {
-                    Text("Copi\u00E1 este JSON para guardar tus datos:", style = MaterialTheme.typography.bodyMedium)
+                    Text(strings.settings.exportDialogText, style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(8.dp))
                     if (exportedJson.isNotBlank()) {
                         OutlinedTextField(value = exportedJson, onValueChange = {}, modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp),
@@ -67,25 +69,25 @@ fun SettingsScreen(
                 TextButton(onClick = {
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     clipboard.setPrimaryClip(ClipData.newPlainText("backup", exportedJson))
-                    Toast.makeText(context, "\u00A1Copiado al portapapeles!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, strings.settings.copiedToast, Toast.LENGTH_SHORT).show()
                     showExportDialog = false
-                }) { Text("Copiar") }
+                }) { Text(strings.settings.copy) }
             },
-            dismissButton = { TextButton(onClick = { showExportDialog = false }) { Text("Cerrar") } }
+            dismissButton = { TextButton(onClick = { showExportDialog = false }) { Text(strings.settings.close) } }
         )
     }
 
     if (showImportDialog) {
         AlertDialog(
             onDismissRequest = { showImportDialog = false },
-            title = { Text("Importar respaldo") },
+            title = { Text(strings.settings.importDialogTitle) },
             text = {
                 Column {
-                    Text("Peg\u00E1 tu JSON de respaldo:", style = MaterialTheme.typography.bodyMedium)
+                    Text(strings.settings.importDialogText, style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(8.dp))
                     OutlinedTextField(value = importText, onValueChange = { importText = it },
                         modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp), textStyle = MaterialTheme.typography.bodySmall,
-                        placeholder = { Text("Peg\u00E1 el JSON aqu\u00ED\u2026") })
+                        placeholder = { Text(strings.settings.importPlaceholder) })
                     if (importResult != null) {
                         Spacer(Modifier.height(8.dp))
                         Text(importResult!!, color = if (importResult!!.startsWith("Import successful")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
@@ -95,17 +97,17 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { if (importText.isNotBlank()) viewModel.importBackup(importText) { ok, msg -> importResult = msg } },
-                    enabled = importText.isNotBlank()) { Text("Importar") }
+                    enabled = importText.isNotBlank()) { Text(strings.settings.importButton) }
             },
-            dismissButton = { TextButton(onClick = { showImportDialog = false; importResult = null }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { showImportDialog = false; importResult = null }) { Text(strings.settings.cancel) } }
         )
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ajustes") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, contentDescription = "Volver") } },
+                title = { Text(strings.settings.title) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, contentDescription = strings.nav.search) } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             )
         }
@@ -118,8 +120,8 @@ fun SettingsScreen(
             SettingsCard {
                 SettingsRow(
                     icon = if (darkMode.value) Icons.Filled.DarkMode else Icons.Filled.LightMode,
-                    title = "Apariencia",
-                    subtitle = if (darkMode.value) "Oscuro" else "Claro",
+                    title = strings.settings.appearance,
+                    subtitle = if (darkMode.value) strings.settings.dark else strings.settings.light,
                 )
                 Spacer(Modifier.height(8.dp))
                 SegmentedControl(
@@ -136,8 +138,8 @@ fun SettingsScreen(
             SettingsCard {
                 SettingsRow(
                     icon = Icons.Filled.Language,
-                    title = "Idioma",
-                    subtitle = if (currentLocale == "es") "Espa\u00F1ol" else "English",
+                    title = strings.settings.language,
+                    subtitle = if (currentLocale == "es") strings.settings.spanish else strings.settings.english,
                 )
                 Spacer(Modifier.height(8.dp))
                 SegmentedControl(
@@ -156,8 +158,8 @@ fun SettingsScreen(
                     Icon(Icons.Filled.Notifications, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
                     Spacer(Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Recordatorios", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
-                        Text(if (expiryEnabled) "Activados" else "Desactivados", style = MaterialTheme.typography.bodySmall,
+                        Text(strings.settings.reminders, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                        Text(if (expiryEnabled) strings.settings.remindersOn else strings.settings.remindersOff, style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Switch(checked = expiryEnabled, onCheckedChange = { viewModel.setExpiryNotificationsEnabled(it) })
@@ -169,7 +171,7 @@ fun SettingsScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.CalendarMonth, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
-                        Text("D\u00EDas antes de vencer", style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                        Text(strings.settings.daysBeforeExpiry, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
                         FilledTonalButton(onClick = { if (expiryDays > 1) viewModel.setExpiryDaysBefore(expiryDays - 1) },
                             enabled = expiryDays > 1, modifier = Modifier.size(32.dp), contentPadding = PaddingValues(0.dp),
                             shape = RoundedCornerShape(50)) {
@@ -190,7 +192,7 @@ fun SettingsScreen(
 
             // ── Data card ───────────────────────────────────────────────────
             SettingsCard {
-                Text("Datos", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
+                Text(strings.settings.data, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
                     fontFamily = NewsreaderFontFamily, color = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.height(12.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -199,7 +201,7 @@ fun SettingsScreen(
                         Row(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             Icon(Icons.Filled.Upload, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
-                            Text("Exportar", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold,
+                            Text(strings.settings.export, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp, color = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
@@ -209,7 +211,7 @@ fun SettingsScreen(
                         Row(modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             Icon(Icons.Filled.Download, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
-                            Text("Importar", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold,
+                            Text(strings.settings.import_, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp, color = MaterialTheme.colorScheme.primary)
                         }
                     }
@@ -218,17 +220,17 @@ fun SettingsScreen(
 
             // ── Navigation shortcuts ────────────────────────────────────────
             SettingsCard {
-                Text("Accesos r\u00E1pidos", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
+                Text(strings.settings.quickAccess, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
                     fontFamily = NewsreaderFontFamily, color = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.height(12.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NavShortcut(Icons.Filled.Favorite, "Favoritos", Modifier.weight(1f)) { navController?.navigate("favorites") }
-                        NavShortcut(Icons.Filled.ShoppingCart, "Compras", Modifier.weight(1f)) { navController?.navigate("shopping") }
+                        NavShortcut(Icons.Filled.Favorite, strings.settings.favorites, Modifier.weight(1f)) { navController?.navigate("favorites") }
+                        NavShortcut(Icons.Filled.ShoppingCart, strings.settings.shopping, Modifier.weight(1f)) { navController?.navigate("shopping") }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NavShortcut(Icons.Filled.CalendarMonth, "Plan semanal", Modifier.weight(1f)) { navController?.navigate("mealplan") }
-                        NavShortcut(Icons.Filled.Build, "Herramientas", Modifier.weight(1f)) { navController?.navigate("tools") }
+                        NavShortcut(Icons.Filled.CalendarMonth, strings.settings.mealPlan, Modifier.weight(1f)) { navController?.navigate("mealplan") }
+                        NavShortcut(Icons.Filled.Build, strings.settings.tools, Modifier.weight(1f)) { navController?.navigate("tools") }
                     }
                 }
             }

@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.kitchencabinet.data.Ingredient
 import com.kitchencabinet.data.Recipe
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.RecipeViewModel
 import kotlinx.coroutines.launch
@@ -67,6 +68,7 @@ fun RecipeDetailScreen(
     onShare: (Int) -> Unit = {},
     viewModel: RecipeViewModel = viewModel()
 ) {
+    val strings = LocalStrings.current
     var recipe by remember { mutableStateOf<Recipe?>(null) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var currentServings by remember { mutableStateOf<Int?>(null) }
@@ -93,14 +95,14 @@ fun RecipeDetailScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete recipe?") },
-            text = { Text("\u201C${r.title}\u201D will be permanently deleted.") },
+            title = { Text(strings.recipeDetail.deleteTitle) },
+            text = { Text(strings.recipeDetail.deleteBody.replace("{title}", r.title)) },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch { viewModel.delete(r); showDeleteDialog = false; onBack() }
-                }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+                }) { Text(strings.recipeDetail.delete, color = MaterialTheme.colorScheme.error) }
             },
-            dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { showDeleteDialog = false }) { Text(strings.recipeDetail.cancel) } }
         )
     }
 
@@ -172,7 +174,7 @@ fun RecipeDetailScreen(
                         Box(modifier = Modifier.padding(8.dp)) {
                             Icon(
                                 Icons.Filled.ArrowBack,
-                                contentDescription = "Volver",
+                                contentDescription = strings.recipeDetail.cancel,
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -187,7 +189,7 @@ fun RecipeDetailScreen(
                             shadowElevation = 2.dp,
                         ) {
                             Box(modifier = Modifier.padding(8.dp)) {
-                                Icon(Icons.Filled.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurface)
+                                Icon(Icons.Filled.Share, contentDescription = strings.recipeDetail.cancel, tint = MaterialTheme.colorScheme.onSurface)
                             }
                         }
                         // Favorite
@@ -268,7 +270,7 @@ fun RecipeDetailScreen(
                         )
                         Spacer(Modifier.width(6.dp))
                         Text(
-                            "Cooked ${r.cookedCount} times",
+                            strings.recipeDetail.cookedTimes.replace("{count}", "${r.cookedCount}"),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary
@@ -296,7 +298,7 @@ fun RecipeDetailScreen(
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                "Servings",
+                                strings.recipeDetail.servings,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -332,7 +334,7 @@ fun RecipeDetailScreen(
                 // ── Rating ─────────────────────────────────────────────────────
                 Column {
                     Text(
-                        "Rating",
+                        strings.recipeDetail.rating,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         fontFamily = NewsreaderFontFamily
@@ -377,7 +379,7 @@ fun RecipeDetailScreen(
                 if (r.equipment.isNotEmpty()) {
                     Column {
                         Text(
-                            "Equipment",
+                            strings.recipeDetail.equipment,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             fontFamily = NewsreaderFontFamily
@@ -417,7 +419,7 @@ fun RecipeDetailScreen(
                 if (r.ingredients.isNotEmpty()) {
                     Column {
                         Text(
-                            "Ingredients",
+                            strings.recipeDetail.ingredients,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             fontFamily = NewsreaderFontFamily
@@ -481,7 +483,7 @@ fun RecipeDetailScreen(
                                                 color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
                                             ) {
                                                 Text(
-                                                    text = "\u2192 Substitute: $substitute",
+                                                    text = strings.recipeDetail.substitute.replace("{name}", substitute),
                                                     style = MaterialTheme.typography.bodySmall,
                                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
@@ -499,7 +501,7 @@ fun RecipeDetailScreen(
                 if (r.steps.isNotEmpty()) {
                     Column {
                         Text(
-                            "Steps",
+                            strings.recipeDetail.steps,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             fontFamily = NewsreaderFontFamily
@@ -566,21 +568,21 @@ fun RecipeDetailScreen(
                 containerColor = MaterialTheme.colorScheme.errorContainer,
                 contentColor = MaterialTheme.colorScheme.onErrorContainer,
             ) {
-                Icon(Icons.Filled.Delete, contentDescription = "Delete recipe", modifier = Modifier.size(20.dp))
+                Icon(Icons.Filled.Delete, contentDescription = strings.recipeDetail.delete, modifier = Modifier.size(20.dp))
             }
             SmallFloatingActionButton(
                 onClick = { onEdit(r.id) },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ) {
-                Icon(Icons.Filled.Edit, contentDescription = "Edit recipe", modifier = Modifier.size(20.dp))
+                Icon(Icons.Filled.Edit, contentDescription = strings.recipeDetail.edit, modifier = Modifier.size(20.dp))
             }
             ExtendedFloatingActionButton(
                 onClick = { onCook(r.id) },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 icon = { Icon(Icons.Filled.PlayArrow, contentDescription = null) },
-                text = { Text("Cook", fontWeight = FontWeight.Bold) }
+                text = { Text(strings.recipeDetail.cook, fontWeight = FontWeight.Bold) }
             )
         }
     }

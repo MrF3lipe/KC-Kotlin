@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.data.Recipe
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.viewmodel.RecipeViewModel
 import kotlinx.coroutines.delay
 
@@ -34,6 +35,7 @@ fun CookScreen(
     onBack: () -> Unit,
     viewModel: RecipeViewModel = viewModel()
 ) {
+    val strings = LocalStrings.current
     var recipe by remember { mutableStateOf<Recipe?>(null) }
     var currentStep by remember { mutableIntStateOf(0) }
     var timerRunning by remember { mutableStateOf(false) }
@@ -82,12 +84,12 @@ fun CookScreen(
     if (showTimerDialog) {
         AlertDialog(
             onDismissRequest = { showTimerDialog = false },
-            title = { Text("Set Timer") },
+            title = { Text(strings.cook.timerTitle) },
             text = {
                 OutlinedTextField(
                     value = timerInput,
                     onValueChange = { timerInput = it.filter { c -> c.isDigit() } },
-                    label = { Text("Minutes") },
+                    label = { Text(strings.cook.timerMinutes) },
                     singleLine = true
                 )
             },
@@ -101,7 +103,7 @@ fun CookScreen(
                     showTimerDialog = false
                     timerInput = ""
                 }) {
-                    Text("Start")
+                    Text(strings.cook.timerStart)
                 }
             },
             dismissButton = {
@@ -109,7 +111,7 @@ fun CookScreen(
                     showTimerDialog = false
                     timerInput = ""
                 }) {
-                    Text("Cancelar")
+                    Text(strings.cook.cancel)
                 }
             }
         )
@@ -119,12 +121,12 @@ fun CookScreen(
     if (showFinishDialog) {
         AlertDialog(
             onDismissRequest = { showFinishDialog = false },
-            title = { Text("Finish Cooking?") },
+            title = { Text(strings.cook.finishTitle) },
             text = {
                 if (currentStep < r.steps.size - 1) {
-                    Text("You haven't reached the last step yet. Are you sure you want to finish?")
+                    Text(strings.cook.finishBody)
                 } else {
-                    Text("Mark this recipe as cooked and go back?")
+                    Text(strings.cook.finishBody)
                 }
             },
             confirmButton = {
@@ -133,12 +135,12 @@ fun CookScreen(
                     viewModel.incrementCookedCount(recipeId)
                     onBack()
                 }) {
-                    Text("Finish", color = MaterialTheme.colorScheme.secondary)
+                    Text(strings.cook.finishConfirm, color = MaterialTheme.colorScheme.secondary)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showFinishDialog = false }) {
-                    Text("Cancelar")
+                    Text(strings.cook.cancel)
                 }
             }
         )
@@ -149,19 +151,19 @@ fun CookScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Cooking: ${r.title}",
+                        strings.cook.cookingTitle.replace("{title}", r.title),
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = strings.nav.search)
                     }
                 },
                 actions = {
                     IconButton(onClick = { showTimerDialog = true }) {
-                        Icon(Icons.Filled.Timer, contentDescription = "Timer")
+                        Icon(Icons.Filled.Timer, contentDescription = strings.cook.timerTitle)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -196,7 +198,7 @@ fun CookScreen(
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(4.dp))
-                            Text("Previous")
+                            Text(strings.cook.previousStep)
                         }
 
                         // Next / Finish button
@@ -205,7 +207,7 @@ fun CookScreen(
                                 onClick = { currentStep++ },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Next")
+                                Text(strings.cook.nextStep)
                                 Spacer(Modifier.width(4.dp))
                                 Icon(
                                     Icons.Filled.ChevronRight,
@@ -228,7 +230,7 @@ fun CookScreen(
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(Modifier.width(4.dp))
-                                Text("Finish")
+                                Text(strings.cook.finish)
                             }
                         }
                     }
@@ -258,7 +260,7 @@ fun CookScreen(
                         )
                         Spacer(Modifier.height(16.dp))
                         Text(
-                            "No steps for this recipe.",
+                            strings.cook.noSteps,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -295,7 +297,7 @@ fun CookScreen(
                             modifier = Modifier.size(16.dp)
                         )
                     },
-                    label = { Text("Timer: $detectedMinutes min") }
+                    label = { Text(strings.cook.timerSuggestion.replace("{minutes}", "$detectedMinutes")) }
                 )
             }
 
@@ -311,7 +313,7 @@ fun CookScreen(
 
             // Step label
             Text(
-                "Step ${currentStep + 1} of ${r.steps.size}",
+                strings.cook.stepOf.replace("{current}", "${currentStep + 1}").replace("{total}", "${r.steps.size}"),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -340,7 +342,7 @@ fun CookScreen(
                         modifier = Modifier.wrapContentSize()
                     ) {
                         Text(
-                            "Step ${currentStep + 1}",
+                            strings.cook.stepBadge.replace("{current}", "${currentStep + 1}"),
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer

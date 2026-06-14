@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.kitchencabinet.ui.i18n.LocalStrings
 
 data class BottomNavItem(
     val route: String,
@@ -28,11 +29,12 @@ data class BottomNavItem(
 
 @Composable
 fun BottomNavBar(navController: NavController) {
+    val strings = LocalStrings.current
     val items = listOf(
-        BottomNavItem("home", "Explorar", Icons.Filled.Explore, Icons.Outlined.Explore),
-        BottomNavItem("search", "Buscar", Icons.Filled.Search, Icons.Outlined.Search),
-        BottomNavItem("addedit", "Nueva", Icons.Filled.AddCircle, Icons.Outlined.AddCircle),
-        BottomNavItem("pantry", "Despensa", Icons.Filled.Kitchen, Icons.Outlined.Kitchen),
+        BottomNavItem("home", strings.nav.explore, Icons.Filled.Explore, Icons.Outlined.Explore),
+        BottomNavItem("search", strings.nav.search, Icons.Filled.Search, Icons.Outlined.Search),
+        BottomNavItem("addedit", strings.nav.new, Icons.Filled.AddCircle, Icons.Outlined.AddCircle),
+        BottomNavItem("pantry", strings.nav.pantry, Icons.Filled.Kitchen, Icons.Outlined.Kitchen),
     )
 
     val backStack by navController.currentBackStackEntryAsState()

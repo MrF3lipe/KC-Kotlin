@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.ui.components.RecipeCard
 import com.kitchencabinet.ui.components.RecipeCardVariant
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.viewmodel.RecipeViewModel
 
 @Composable
@@ -23,6 +24,7 @@ fun FavoritesScreen(
     viewModel: RecipeViewModel = viewModel(),
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val favorites by viewModel.favorites.collectAsState()
 
     if (favorites.isEmpty()) {
@@ -39,12 +41,12 @@ fun FavoritesScreen(
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "No favorites yet",
+                    strings.favorites.emptyTitle,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    "Tap \u2665 on any recipe to save it here",
+                    strings.favorites.emptySubtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

@@ -14,8 +14,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kitchencabinet.ui.components.AppShell
+import com.kitchencabinet.ui.i18n.LocalStrings
+import com.kitchencabinet.ui.i18n.Strings
 import com.kitchencabinet.ui.screens.*
 import com.kitchencabinet.ui.theme.KitchenCabinetTheme
+import com.kitchencabinet.viewmodel.SettingsViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 val LocalDarkMode = compositionLocalOf { mutableStateOf(false) }
 
@@ -38,6 +42,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun KitchenCabinetApp() {
     val navController = rememberNavController()
+    val settingsViewModel: SettingsViewModel = viewModel()
+    val settings by settingsViewModel.settings.collectAsState()
+    val strings = if (settings?.locale == "en") Strings.en else Strings.es
+
+    CompositionLocalProvider(LocalStrings provides strings) {
 
     NavHost(
         navController = navController,
@@ -144,5 +153,6 @@ fun KitchenCabinetApp() {
         composable("settings") {
             SettingsScreen(onBack = { navController.popBackStack() })
         }
+    }
     }
 }

@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.kitchencabinet.data.Ingredient
 import com.kitchencabinet.data.Recipe
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.RecipeViewModel
 import kotlinx.coroutines.launch
@@ -35,6 +36,7 @@ fun AddEditScreen(
     onBack: () -> Unit,
     viewModel: RecipeViewModel = viewModel()
 ) {
+    val strings = LocalStrings.current
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("General") }
@@ -115,10 +117,10 @@ fun AddEditScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isEditing) "Editar receta" else "Nueva receta") },
+                title = { Text(if (isEditing) strings.addEdit.editTitle else strings.addEdit.newTitle) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = strings.nav.search)
                     }
                 },
                 actions = {
@@ -147,7 +149,7 @@ fun AddEditScreen(
                                 onBack()
                             }
                         }
-                    ) { Text("Guardar") }
+                    ) { Text(strings.addEdit.save) }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -163,22 +165,22 @@ fun AddEditScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Title
-            SectionLabel("Título")
+            SectionLabel(strings.addEdit.fieldTitle)
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                placeholder = { Text("Ej: Sopa de Tomate") },
+                placeholder = { Text(strings.addEdit.fieldTitlePlaceholder) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp)
             )
 
             // Description
-            SectionLabel("Descripción")
+            SectionLabel(strings.addEdit.fieldDescription)
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                placeholder = { Text("Breve descripción de la receta") },
+                placeholder = { Text(strings.addEdit.fieldDescriptionPlaceholder) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
                 maxLines = 4,
@@ -186,7 +188,7 @@ fun AddEditScreen(
             )
 
             // Image
-            SectionLabel("Imagen")
+            SectionLabel(strings.addEdit.fieldImage)
             if (imageUrl.isNotBlank()) {
                 AsyncImage(
                     model = imageUrl,
@@ -199,7 +201,7 @@ fun AddEditScreen(
                 OutlinedTextField(
                     value = imageUrl,
                     onValueChange = { imageUrl = it },
-                    placeholder = { Text("https://...") },
+                    placeholder = { Text(strings.addEdit.fieldImagePlaceholder) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp)
@@ -209,9 +211,9 @@ fun AddEditScreen(
                     modifier = Modifier.height(56.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Icon(Icons.Filled.Image, "Galería", Modifier.size(18.dp))
+                    Icon(Icons.Filled.Image, strings.addEdit.gallery, Modifier.size(18.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Galería", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                    Text(strings.addEdit.gallery, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
                 }
                 FilledTonalButton(
                     onClick = {
@@ -222,7 +224,7 @@ fun AddEditScreen(
                     modifier = Modifier.height(56.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Icon(Icons.Filled.CameraAlt, "Cámara", Modifier.size(18.dp))
+                    Icon(Icons.Filled.CameraAlt, strings.addEdit.camera, Modifier.size(18.dp))
                 }
             }
 
@@ -237,7 +239,7 @@ fun AddEditScreen(
                         value = category,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Categoría") },
+                        label = { Text(strings.addEdit.category) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                         modifier = Modifier.fillMaxWidth().menuAnchor(),
                         shape = RoundedCornerShape(12.dp)
@@ -261,10 +263,10 @@ fun AddEditScreen(
                     modifier = Modifier.weight(1f)
                 ) {
                     OutlinedTextField(
-                        value = when (difficulty) { "easy" -> "Fácil"; "medium" -> "Media"; "hard" -> "Difícil"; else -> "" },
+                        value = when (difficulty) { "easy" -> strings.addEdit.easy; "medium" -> strings.addEdit.medium; "hard" -> strings.addEdit.hard; else -> "" },
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Dificultad") },
+                        label = { Text(strings.addEdit.difficulty) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = difficultyExpanded) },
                         modifier = Modifier.fillMaxWidth().menuAnchor(),
                         shape = RoundedCornerShape(12.dp)
@@ -276,7 +278,7 @@ fun AddEditScreen(
                         difficulties.forEach { d ->
                             DropdownMenuItem(
                                 text = {
-                                    Text(when (d) { "easy" -> "Fácil"; "medium" -> "Media"; else -> "Difícil" })
+                                    Text(when (d) { "easy" -> strings.addEdit.easy; "medium" -> strings.addEdit.medium; else -> strings.addEdit.hard })
                                 },
                                 onClick = { difficulty = d; difficultyExpanded = false }
                             )
@@ -290,7 +292,7 @@ fun AddEditScreen(
                 OutlinedTextField(
                     value = cookTime,
                     onValueChange = { cookTime = it.filter { c -> c.isDigit() } },
-                    label = { Text("Tiempo (min)") },
+                    label = { Text(strings.addEdit.time) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp)
@@ -298,7 +300,7 @@ fun AddEditScreen(
                 OutlinedTextField(
                     value = servings,
                     onValueChange = { servings = it.filter { c -> c.isDigit() } },
-                    label = { Text("Porciones") },
+                    label = { Text(strings.addEdit.servings) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp)
@@ -306,7 +308,7 @@ fun AddEditScreen(
             }
 
             // Ingredients
-            SectionLabel("Ingredientes")
+            SectionLabel(strings.addEdit.ingredients)
             ingredientFields.forEachIndexed { idx, field ->
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
@@ -316,7 +318,7 @@ fun AddEditScreen(
                                 this[idx] = field.copy(name = newName)
                             }
                         },
-                        placeholder = { Text("Nombre") },
+                        placeholder = { Text(strings.addEdit.ingredientName) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp)
@@ -328,7 +330,7 @@ fun AddEditScreen(
                                 this[idx] = field.copy(quantity = newQty)
                             }
                         },
-                        placeholder = { Text("Cant.") },
+                        placeholder = { Text(strings.addEdit.ingredientQuantity) },
                         modifier = Modifier.width(80.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp)
@@ -337,7 +339,7 @@ fun AddEditScreen(
                         IconButton(onClick = {
                             ingredientFields = ingredientFields.toMutableList().apply { removeAt(idx) }
                         }, modifier = Modifier.size(36.dp)) {
-                            Icon(Icons.Filled.RemoveCircle, "Quitar", Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
+                            Icon(Icons.Filled.RemoveCircle, strings.addEdit.remove, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
@@ -348,11 +350,11 @@ fun AddEditScreen(
             }) {
                 Icon(Icons.Filled.Add, null, Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("Añadir ingrediente")
+                Text(strings.addEdit.addIngredient)
             }
 
             // Equipment
-            SectionLabel("Utensilios")
+            SectionLabel(strings.addEdit.utensils)
             equipmentFields.forEachIndexed { idx, eq ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
@@ -360,7 +362,7 @@ fun AddEditScreen(
                         onValueChange = { newEq ->
                             equipmentFields = equipmentFields.toMutableList().apply { this[idx] = newEq }
                         },
-                        placeholder = { Text("Ej: Sartén") },
+                        placeholder = { Text(strings.addEdit.utensilPlaceholder) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp)
@@ -369,7 +371,7 @@ fun AddEditScreen(
                         IconButton(onClick = {
                             equipmentFields = equipmentFields.toMutableList().apply { removeAt(idx) }
                         }, modifier = Modifier.size(36.dp)) {
-                            Icon(Icons.Filled.RemoveCircle, "Quitar", Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
+                            Icon(Icons.Filled.RemoveCircle, strings.addEdit.remove, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
@@ -379,15 +381,15 @@ fun AddEditScreen(
             }) {
                 Icon(Icons.Filled.Add, null, Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("Añadir utensilio")
+                Text(strings.addEdit.addUtensil)
             }
 
             // Steps
-            SectionLabel("Pasos")
+            SectionLabel(strings.addEdit.steps)
             OutlinedTextField(
                 value = stepsText,
                 onValueChange = { stepsText = it },
-                placeholder = { Text("Un paso por línea") },
+                placeholder = { Text(strings.addEdit.stepsPlaceholder) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
                 maxLines = 8,

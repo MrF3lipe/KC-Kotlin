@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.kitchencabinet.data.MealPlanEntry
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.viewmodel.MealPlanViewModel
 import com.kitchencabinet.viewmodel.RecipeViewModel
 import java.text.SimpleDateFormat
@@ -30,6 +31,7 @@ fun MealPlanScreen(
     mealPlanViewModel: MealPlanViewModel = viewModel(),
     recipeViewModel: RecipeViewModel = viewModel()
 ) {
+    val strings = LocalStrings.current
     val weekEntries by mealPlanViewModel.currentWeekEntries.collectAsState()
     val allRecipes by recipeViewModel.recipes.collectAsState()
     val currentWeekStart by mealPlanViewModel.currentWeekStart.collectAsState()
@@ -40,8 +42,10 @@ fun MealPlanScreen(
 
     val dayNames = remember {
         listOf(
-            "mon" to "Lunes", "tue" to "Martes", "wed" to "Miércoles",
-            "thu" to "Jueves", "fri" to "Viernes", "sat" to "Sábado", "sun" to "Domingo"
+            "mon" to strings.mealPlan.monday, "tue" to strings.mealPlan.tuesday,
+            "wed" to strings.mealPlan.wednesday, "thu" to strings.mealPlan.thursday,
+            "fri" to strings.mealPlan.friday, "sat" to strings.mealPlan.saturday,
+            "sun" to strings.mealPlan.sunday
         )
     }
 
@@ -58,10 +62,10 @@ fun MealPlanScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Meal Plan") },
+                title = { Text(strings.mealPlan.title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = strings.nav.search)
                     }
                 },
                 actions = {
@@ -73,7 +77,7 @@ fun MealPlanScreen(
                         cal.add(Calendar.WEEK_OF_YEAR, -1)
                         mealPlanViewModel.loadWeek(fmt.format(cal.time))
                     }) {
-                        Icon(Icons.Filled.ChevronLeft, contentDescription = "Previous week")
+                        Icon(Icons.Filled.ChevronLeft, contentDescription = strings.nav.search)
                     }
                     // Next week
                     IconButton(onClick = {
@@ -83,19 +87,19 @@ fun MealPlanScreen(
                         cal.add(Calendar.WEEK_OF_YEAR, 1)
                         mealPlanViewModel.loadWeek(fmt.format(cal.time))
                     }) {
-                        Icon(Icons.Filled.ChevronRight, contentDescription = "Next week")
+                        Icon(Icons.Filled.ChevronRight, contentDescription = strings.nav.search)
                     }
                     // Add all to shopping
                     IconButton(onClick = {
                         mealPlanViewModel.addCurrentWeekToShopping()
                     }) {
-                        Icon(Icons.Filled.ShoppingCart, contentDescription = "Add all to shopping")
+                        Icon(Icons.Filled.ShoppingCart, contentDescription = strings.nav.search)
                     }
                     // Clear week
                     IconButton(onClick = {
                         mealPlanViewModel.clearWeek(currentWeekStart)
                     }) {
-                        Icon(Icons.Filled.DeleteSweep, contentDescription = "Clear week")
+                        Icon(Icons.Filled.DeleteSweep, contentDescription = strings.nav.search)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -112,7 +116,7 @@ fun MealPlanScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "Week of $currentWeekStart",
+                strings.mealPlan.weekOf.replace("{date}", currentWeekStart),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -142,13 +146,13 @@ fun MealPlanScreen(
                             )
                             Spacer(Modifier.height(8.dp))
 
-                            MealSlot("Breakfast", breakfast, recipeTitleMap, onAdd = {
+                            MealSlot(strings.mealPlan.breakfast, breakfast, recipeTitleMap, onAdd = {
                                 selectedDay = dayShort; selectedSlot = "breakfast"; showRecipePicker = true
                             }, onClick = { it.recipeId.let(onRecipeClick) })
-                            MealSlot("Lunch", lunch, recipeTitleMap, onAdd = {
+                            MealSlot(strings.mealPlan.lunch, lunch, recipeTitleMap, onAdd = {
                                 selectedDay = dayShort; selectedSlot = "lunch"; showRecipePicker = true
                             }, onClick = { it.recipeId.let(onRecipeClick) })
-                            MealSlot("Dinner", dinner, recipeTitleMap, onAdd = {
+                            MealSlot(strings.mealPlan.dinner, dinner, recipeTitleMap, onAdd = {
                                 selectedDay = dayShort; selectedSlot = "dinner"; showRecipePicker = true
                             }, onClick = { it.recipeId.let(onRecipeClick) })
                         }
@@ -162,7 +166,7 @@ fun MealPlanScreen(
     if (showRecipePicker) {
         AlertDialog(
             onDismissRequest = { showRecipePicker = false },
-            title = { Text("Select Recipe for ${selectedSlot.replaceFirstChar { it.uppercase() }}") },
+            title = { Text(strings.mealPlan.selectRecipe.replace("{slot}", selectedSlot.replaceFirstChar { it.uppercase() })) },
             text = {
                 LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
                     items(allRecipes.filter { it.id > 0 }) { recipe ->
@@ -198,7 +202,7 @@ fun MealPlanScreen(
                 }
             },
             confirmButton = {},
-            dismissButton = { TextButton(onClick = { showRecipePicker = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { showRecipePicker = false }) { Text(strings.mealPlan.cancel) } }
         )
     }
 }
@@ -237,7 +241,7 @@ private fun MealSlot(
             ) {
                 Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(14.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("Agregar", style = MaterialTheme.typography.labelSmall)
+                Text(strings.mealPlan.add, style = MaterialTheme.typography.labelSmall)
             }
         }
     }

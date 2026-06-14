@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.data.ShoppingItem
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.ShoppingViewModel
 
@@ -29,6 +30,7 @@ fun ShoppingScreen(
     viewModel: ShoppingViewModel = viewModel(),
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val items by viewModel.shoppingItems.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
@@ -38,7 +40,8 @@ fun ShoppingScreen(
             onConfirm = { name, qty, unit ->
                 viewModel.insert(ShoppingItem(name = name, quantity = qty.toDoubleOrNull() ?: 1.0, unit = unit))
                 showDialog = false
-            }
+            },
+            strings = strings
         )
     }
 
@@ -48,9 +51,9 @@ fun ShoppingScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Filled.ShoppingCart, null, Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(12.dp))
-                    Text("Tu lista est\u00E1 vac\u00EDa", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(strings.shopping.emptyTitle, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(8.dp))
-                    Text("Agreg\u00E1 items desde recetas o manualmente", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(strings.shopping.emptySubtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
@@ -63,7 +66,7 @@ fun ShoppingScreen(
                 item {
                     Column(modifier = Modifier.padding(bottom = 4.dp)) {
                         Text(
-                            "Lista de compras",
+                            strings.shopping.title,
                             style = MaterialTheme.typography.displaySmall,
                             fontFamily = NewsreaderFontFamily,
                             fontWeight = FontWeight.SemiBold,
@@ -91,7 +94,7 @@ fun ShoppingScreen(
                                 ) {
                                     Icon(Icons.Filled.Kitchen, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
                                     Text(
-                                        "Pasar a despensa",
+                                        strings.shopping.moveToPantry,
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 0.5.sp,
@@ -111,7 +114,7 @@ fun ShoppingScreen(
                                 ) {
                                     Icon(Icons.Filled.Clear, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onErrorContainer)
                                     Text(
-                                        "Limpiar",
+                                        strings.shopping.clear,
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 0.5.sp,
@@ -135,7 +138,7 @@ fun ShoppingScreen(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
         ) {
-            Icon(Icons.Filled.Add, contentDescription = "Add item")
+            Icon(Icons.Filled.Add, contentDescription = strings.shopping.addItem)
         }
     }
 }
@@ -200,7 +203,8 @@ private fun ShoppingItemRow(item: ShoppingItem, viewModel: ShoppingViewModel) {
 @Composable
 private fun ShoppingBottomSheet(
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String) -> Unit
+    onConfirm: (String, String, String) -> Unit,
+    strings: com.kitchencabinet.ui.i18n.Strings,
 ) {
     var name by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("1") }
@@ -213,18 +217,18 @@ private fun ShoppingBottomSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                "Agregar item",
+                strings.shopping.addItem,
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = NewsreaderFontFamily,
                 fontWeight = FontWeight.SemiBold,
             )
 
-            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nombre") },
+            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(strings.shopping.name) },
                 modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(12.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(value = quantity, onValueChange = { quantity = it.filter { c -> c.isDigit() || c == '.' } },
-                    label = { Text("Cantidad") },
+                    label = { Text(strings.shopping.quantity) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.weight(1f), singleLine = true, shape = RoundedCornerShape(12.dp))
                 FilledTonalButton(onClick = {
@@ -244,7 +248,7 @@ private fun ShoppingBottomSheet(
             }
 
             ExposedDropdownMenuBox(expanded = unitExpanded, onExpandedChange = { unitExpanded = !unitExpanded }) {
-                OutlinedTextField(value = selectedUnit, onValueChange = {}, readOnly = true, label = { Text("Unidad") },
+                OutlinedTextField(value = selectedUnit, onValueChange = {}, readOnly = true, label = { Text(strings.shopping.unit) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = unitExpanded) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(), singleLine = true, shape = RoundedCornerShape(12.dp))
                 ExposedDropdownMenu(expanded = unitExpanded, onDismissRequest = { unitExpanded = false }) {
@@ -257,7 +261,7 @@ private fun ShoppingBottomSheet(
             Button(
                 onClick = { if (name.isNotBlank()) onConfirm(name.trim(), quantity, selectedUnit) },
                 enabled = name.isNotBlank(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(50)
-            ) { Text("Agregar") }
+            ) { Text(strings.shopping.add) }
 
             Spacer(Modifier.height(24.dp))
         }

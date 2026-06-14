@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.data.PantryCategory
 import com.kitchencabinet.data.PantryItem
+import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.CategoryWithItems
 import com.kitchencabinet.viewmodel.PantryViewModel
@@ -32,6 +33,7 @@ fun PantryScreen(
     viewModel: PantryViewModel = viewModel(),
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val groupedItems by viewModel.groupedItems.collectAsState()
     val categories by viewModel.categories.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
@@ -55,7 +57,8 @@ fun PantryScreen(
                     viewModel.update(item.copy(name = name, category = category, quantity = qty.toDoubleOrNull() ?: 1.0, unit = unit, expiresAt = expiresAt))
                 }
                 showDialog = false; editItem = null
-            }
+            },
+            strings = strings
         )
     }
 
@@ -66,7 +69,8 @@ fun PantryScreen(
             onDismiss = { showCategoryManager = false },
             onInsert = { viewModel.insertCategory(it) },
             onUpdate = { viewModel.updateCategory(it) },
-            onDelete = { viewModel.deleteCategory(it) }
+            onDelete = { viewModel.deleteCategory(it) },
+            strings = strings
         )
     }
 
@@ -76,7 +80,7 @@ fun PantryScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Filled.Kitchen, null, Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(12.dp))
-                    Text("Tu despensa est\u00E1 vac\u00EDa", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(strings.pantry.emptyTitle, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
@@ -89,7 +93,7 @@ fun PantryScreen(
                 item(key = "header") {
                     Column(modifier = Modifier.padding(bottom = 8.dp)) {
                         Text(
-                            "\u00BFQu\u00E9 hay en la despensa?",
+                            strings.pantry.title,
                             style = MaterialTheme.typography.displayMedium,
                             fontFamily = NewsreaderFontFamily,
                             fontWeight = FontWeight.SemiBold,
@@ -124,7 +128,7 @@ fun PantryScreen(
                             ) {
                                 Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(16.dp))
                                 Text(
-                                    "A\u00F1adir ingrediente",
+                                    strings.pantry.addIngredient,
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 0.5.sp,
@@ -139,7 +143,7 @@ fun PantryScreen(
                             border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                         ) {
                             Text(
-                                "Gestionar categor\u00EDas",
+                                strings.pantry.manageCategories,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp,
@@ -173,7 +177,8 @@ fun PantryScreen(
                             onToggleAvailable = { viewModel.toggleAvailable(item) },
                             onAdjustQuantity = { delta -> viewModel.adjustQuantity(item, delta) },
                             onEdit = { editItem = item; showDialog = true },
-                            onDelete = { viewModel.delete(item) }
+                            onDelete = { viewModel.delete(item) },
+                            strings = strings
                         )
                     }
                 }
@@ -188,7 +193,8 @@ private fun PantryItemRow(
     onToggleAvailable: (PantryItem) -> Unit,
     onAdjustQuantity: (Double) -> Unit,
     onEdit: (PantryItem) -> Unit,
-    onDelete: (PantryItem) -> Unit
+    onDelete: (PantryItem) -> Unit,
+    strings: com.kitchencabinet.ui.i18n.Strings,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -213,11 +219,10 @@ private fun PantryItemRow(
                 if (item.expiresAt != null && item.expiresAt > 0) {
                     val daysLeft = (item.expiresAt - System.currentTimeMillis()) / 86400000
                     val expiryText = when {
-                        daysLeft < 0 -> "\u00A1Vencido!"
-                        daysLeft == 0L -> "Hoy"
-                        daysLeft == 1L -> "Ma\u00F1ana"
-                        daysLeft <= 3L -> "${daysLeft} d\u00EDas"
-                        else -> "${daysLeft} d\u00EDas"
+                        daysLeft < 0 -> strings.pantry.expired
+                        daysLeft == 0L -> strings.pantry.today
+                        daysLeft == 1L -> strings.pantry.tomorrow
+                        else -> strings.pantry.days.replace("{n}", "$daysLeft")
                     }
                     val expiryColor = when {
                         daysLeft <= 1L -> MaterialTheme.colorScheme.error
@@ -267,6 +272,7 @@ private fun PantryItemBottomSheet(
     categories: List<PantryCategory>,
     onDismiss: () -> Unit,
     onConfirm: (name: String, category: String, quantity: String, unit: String, expiresAt: Long?) -> Unit,
+    strings: com.kitchencabinet.ui.i18n.Strings,
 ) {
     var name by remember { mutableStateOf(item?.name ?: "") }
     var selectedCategory by remember { mutableStateOf(item?.category ?: categories.firstOrNull()?.name ?: "General") }
@@ -283,18 +289,18 @@ private fun PantryItemBottomSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                if (item == null) "A\u00F1adir ingrediente" else "Editar ingrediente",
+                if (item == null) strings.pantry.addIngredient else strings.pantry.editIngredient,
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = NewsreaderFontFamily,
                 fontWeight = FontWeight.SemiBold,
             )
 
-            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nombre") },
+            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(strings.pantry.name) },
                 singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
 
             ExposedDropdownMenuBox(expanded = categoryExpanded, onExpandedChange = { categoryExpanded = it }) {
                 OutlinedTextField(value = selectedCategory, onValueChange = {}, readOnly = true,
-                    label = { Text("Categor\u00EDa") },
+                    label = { Text(strings.pantry.category) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp))
                 ExposedDropdownMenu(expanded = categoryExpanded, onDismissRequest = { categoryExpanded = false }) {
@@ -307,13 +313,13 @@ private fun PantryItemBottomSheet(
 
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    if (expiresAt != null) "Caduca: ${formatDate(expiresAt!!)}" else "Sin fecha de caducidad",
+                    if (expiresAt != null) strings.pantry.expires.replace("{date}", formatDate(expiresAt!!)) else strings.pantry.noExpiry,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f)
                 )
                 TextButton(onClick = { showDatePicker = true }) {
-                    Text(if (expiresAt != null) "Cambiar" else "A\u00F1adir")
+                    Text(if (expiresAt != null) strings.pantry.change else strings.pantry.add)
                 }
                 if (expiresAt != null) {
                     IconButton(onClick = { expiresAt = null }, modifier = Modifier.size(36.dp)) {
@@ -330,23 +336,23 @@ private fun PantryItemBottomSheet(
                         TextButton(onClick = {
                             expiresAt = datePickerState.selectedDateMillis
                             showDatePicker = false
-                        }) { Text("OK") }
+                        }) { Text(strings.pantry.ok) }
                     },
                     dismissButton = {
-                        TextButton(onClick = { showDatePicker = false }) { Text("Cancelar") }
+                        TextButton(onClick = { showDatePicker = false }) { Text(strings.pantry.cancel) }
                     }
                 ) {
                     DatePicker(state = datePickerState)
                 }
             }
 
-            OutlinedTextField(value = quantity, onValueChange = { quantity = it }, label = { Text("Cantidad") },
+            OutlinedTextField(value = quantity, onValueChange = { quantity = it }, label = { Text(strings.pantry.quantity) },
                 singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
 
             ExposedDropdownMenuBox(expanded = unitExpanded, onExpandedChange = { unitExpanded = it }) {
                 OutlinedTextField(value = selectedUnit, onValueChange = {}, readOnly = true,
-                    label = { Text("Unidad") },
+                    label = { Text(strings.pantry.unit) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = unitExpanded) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp))
                 ExposedDropdownMenu(expanded = unitExpanded, onDismissRequest = { unitExpanded = false }) {
@@ -361,7 +367,7 @@ private fun PantryItemBottomSheet(
                 enabled = name.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(50)
-            ) { Text("Guardar") }
+            ) { Text(strings.pantry.save) }
 
             Spacer(Modifier.height(24.dp))
         }
@@ -381,6 +387,7 @@ private fun CategoryManagerBottomSheet(
     onInsert: (PantryCategory) -> Unit,
     onUpdate: (PantryCategory) -> Unit,
     onDelete: (PantryCategory) -> Unit,
+    strings: com.kitchencabinet.ui.i18n.Strings,
 ) {
     var newName by remember { mutableStateOf("") }
     var newEmoji by remember { mutableStateOf("") }
@@ -396,7 +403,7 @@ private fun CategoryManagerBottomSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "Gestionar categor\u00EDas",
+                strings.pantry.manageCategoriesTitle,
                 style = MaterialTheme.typography.titleLarge,
                 fontFamily = NewsreaderFontFamily,
                 fontWeight = FontWeight.SemiBold,
@@ -407,7 +414,7 @@ private fun CategoryManagerBottomSheet(
                     if (editingId == cat.id) {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                             OutlinedTextField(value = editEmoji, onValueChange = { editEmoji = it },
-                                modifier = Modifier.width(56.dp), singleLine = true, placeholder = { Text("\uD83D\uDCE6") })
+                                modifier = Modifier.width(56.dp), singleLine = true, placeholder = { Text(strings.pantry.emojiPlaceholder) })
                             Spacer(Modifier.width(8.dp))
                             OutlinedTextField(value = editName, onValueChange = { editName = it },
                                 modifier = Modifier.weight(1f), singleLine = true)
@@ -415,7 +422,7 @@ private fun CategoryManagerBottomSheet(
                                 if (editName.isNotBlank()) { onUpdate(cat.copy(name = editName, emoji = editEmoji.ifBlank { null })) }
                                 editingId = null
                             }) { Icon(Icons.Filled.Check, "Save") }
-                            IconButton(onClick = { editingId = null }) { Icon(Icons.Filled.Close, "Cancelar") }
+                            IconButton(onClick = { editingId = null }) { Icon(Icons.Filled.Close, strings.pantry.cancel) }
                         }
                     } else {
                         Row(
@@ -440,21 +447,21 @@ private fun CategoryManagerBottomSheet(
 
                 item {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                    Text("A\u00F1adir categor\u00EDa", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    Text(strings.pantry.addCategory, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(value = newEmoji, onValueChange = { newEmoji = it },
-                            modifier = Modifier.width(56.dp), singleLine = true, placeholder = { Text("\uD83D\uDCE6") })
+                            modifier = Modifier.width(56.dp), singleLine = true, placeholder = { Text(strings.pantry.emojiPlaceholder) })
                         Spacer(Modifier.width(8.dp))
                         OutlinedTextField(value = newName, onValueChange = { newName = it },
-                            modifier = Modifier.weight(1f), singleLine = true, placeholder = { Text("Nombre") })
+                            modifier = Modifier.weight(1f), singleLine = true, placeholder = { Text(strings.pantry.categoryName) })
                         IconButton(onClick = {
                             if (newName.isNotBlank()) {
                                 onInsert(PantryCategory(name = newName, emoji = newEmoji.ifBlank { null }))
                                 newName = ""; newEmoji = ""
                             }
                         }, enabled = newName.isNotBlank()) {
-                            Icon(Icons.Filled.Add, "Agregar", tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Filled.Add, strings.pantry.add, tint = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
