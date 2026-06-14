@@ -2,6 +2,7 @@ package com.kitchencabinet.ui.screens
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.ToneGenerator
 import android.os.Build
@@ -460,7 +461,7 @@ private fun onTimerExpired(context: Context) {
 
     // Play beep alarm via ToneGenerator
     try {
-        val tone = ToneGenerator(ToneGenerator.STREAM_ALARM, 80)
+        val tone = ToneGenerator(AudioManager.STREAM_ALARM, 80)
         tone.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 2000)
         // ToneGenerator stops automatically after the duration
     } catch (_: Exception) {

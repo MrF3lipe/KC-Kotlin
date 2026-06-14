@@ -451,7 +451,7 @@ data class Strings(
             ),
             recipeDetail = RecipeDetailStrings(
                 deleteTitle = "¿Eliminar receta?",
-                deleteBody = '"{title}" se eliminará permanentemente.',
+                deleteBody = "\"{title}\" se eliminará permanentemente.",
                 delete = "Eliminar",
                 cancel = "Cancelar",
                 cookedTimes = "Cocinada {count} veces",
@@ -718,7 +718,7 @@ data class Strings(
             ),
             recipeDetail = RecipeDetailStrings(
                 deleteTitle = "Delete recipe?",
-                deleteBody = '"{title}" will be permanently deleted.',
+                deleteBody = "\"{title}\" will be permanently deleted.",
                 delete = "Delete",
                 cancel = "Cancel",
                 cookedTimes = "Cooked {count} times",

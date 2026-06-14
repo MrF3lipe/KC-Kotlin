@@ -215,6 +215,7 @@ private fun MealSlot(
     onAdd: () -> Unit,
     onClick: (MealPlanEntry) -> Unit
 ) {
+    val strings = LocalStrings.current
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
