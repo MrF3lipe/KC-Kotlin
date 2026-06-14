@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.kitchencabinet.notification.NotificationHelper
 import com.kitchencabinet.ui.components.AppShell
 import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.i18n.Strings
@@ -27,6 +28,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        NotificationHelper.createChannel(this)
+        NotificationHelper.scheduleDailyCheck(this)
         setContent {
             val darkMode = remember { mutableStateOf(false) }
 

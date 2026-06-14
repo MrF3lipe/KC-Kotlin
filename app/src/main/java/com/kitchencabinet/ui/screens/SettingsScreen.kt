@@ -1,9 +1,13 @@
 ﻿package com.kitchencabinet.ui.screens
 
+import android.Manifest
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.LocalDarkMode
 import com.kitchencabinet.ui.i18n.LocalStrings
@@ -48,6 +53,14 @@ fun SettingsScreen(
     val currentLocale = settings?.locale ?: "es"
     val expiryEnabled = notificationsConfig?.expiryEnabled ?: true
     val expiryDays = notificationsConfig?.expiryDaysBefore ?: 2
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            viewModel.setExpiryNotificationsEnabled(true)
+        }
+    }
 
     if (showExportDialog) {
         var exportedJson by remember { mutableStateOf("") }
@@ -162,7 +175,15 @@ fun SettingsScreen(
                         Text(if (expiryEnabled) strings.settings.remindersOn else strings.settings.remindersOff, style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    Switch(checked = expiryEnabled, onCheckedChange = { viewModel.setExpiryNotificationsEnabled(it) })
+                    Switch(checked = expiryEnabled, onCheckedChange = { enabled ->
+                        if (enabled && Build.VERSION.SDK_INT >= 33 &&
+                            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            viewModel.setExpiryNotificationsEnabled(enabled)
+                        }
+                    })
                 }
                 if (expiryEnabled) {
                     Spacer(Modifier.height(8.dp))

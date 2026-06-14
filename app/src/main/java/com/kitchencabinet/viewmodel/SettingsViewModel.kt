@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.kitchencabinet.data.*
+import com.kitchencabinet.notification.NotificationHelper
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.json.JSONArray
@@ -30,9 +31,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun setExpiryNotificationsEnabled(enabled: Boolean) = viewModelScope.launch {
         repo.setExpiryNotificationsEnabled(enabled)
+        if (enabled) {
+            NotificationHelper.scheduleDailyCheck(getApplication())
+        } else {
+            NotificationHelper.cancelDailyCheck(getApplication())
+        }
     }
     fun setExpiryDaysBefore(days: Int) = viewModelScope.launch {
         repo.setExpiryDaysBefore(days)
+        // Reschedule so the next check picks up the new threshold
+        val ctx = getApplication<Application>()
+        NotificationHelper.cancelDailyCheck(ctx)
+        NotificationHelper.scheduleDailyCheck(ctx)
     }
 
     fun exportBackup(callback: (String) -> Unit) = viewModelScope.launch {
