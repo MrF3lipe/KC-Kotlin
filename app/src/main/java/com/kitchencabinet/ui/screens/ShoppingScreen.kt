@@ -34,11 +34,40 @@ fun ShoppingScreen(
     val items by viewModel.shoppingItems.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
+    var editingItemId by remember { mutableStateOf<Int?>(null) }
+    var editingPrice by remember { mutableStateOf("") }
+
+    if (editingItemId != null) {
+        AlertDialog(
+            onDismissRequest = { editingItemId = null },
+            title = { Text(strings.shopping.estimatedPrice) },
+            text = {
+                OutlinedTextField(value = editingPrice, onValueChange = { editingPrice = it },
+                    label = { Text(strings.shopping.estimatedPrice) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true, shape = RoundedCornerShape(12.dp))
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val price = editingPrice.toDoubleOrNull()
+                    viewModel.updatePrice(editingItemId!!, price)
+                    editingItemId = null
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.updatePrice(editingItemId!!, null)
+                    editingItemId = null
+                }) { Text(if (editingPrice.isBlank()) strings.shopping.clear else strings.settings.cancel) }
+            }
+        )
+    }
+
     if (showDialog) {
         ShoppingBottomSheet(
             onDismiss = { showDialog = false },
-            onConfirm = { name, qty, unit ->
-                viewModel.insert(ShoppingItem(name = name, quantity = qty.toDoubleOrNull() ?: 1.0, unit = unit))
+            onConfirm = { name, qty, unit, price ->
+                viewModel.insert(ShoppingItem(name = name, quantity = qty.toDoubleOrNull() ?: 1.0, unit = unit, estimatedPrice = price))
                 showDialog = false
             },
             strings = strings
@@ -72,6 +101,16 @@ fun ShoppingScreen(
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onBackground,
                         )
+                        val total = items.sumOf { it.estimatedPrice?.times(it.quantity) ?: 0.0 }
+                        if (total > 0) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                "${strings.shopping.total}: $${"%.2f".format(total)}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
                     }
                 }
 
@@ -127,7 +166,11 @@ fun ShoppingScreen(
                 }
 
                 items(items, key = { it.id }) { item ->
-                    ShoppingItemRow(item = item, viewModel = viewModel)
+                    ShoppingItemRow(item = item, viewModel = viewModel, onEditPrice = { id ->
+                        val curr = items.find { it.id == id }?.estimatedPrice
+                        editingPrice = curr?.let { "%.2f".format(it) } ?: ""
+                        editingItemId = id
+                    })
                 }
             }
         }
@@ -144,7 +187,11 @@ fun ShoppingScreen(
 }
 
 @Composable
-private fun ShoppingItemRow(item: ShoppingItem, viewModel: ShoppingViewModel) {
+private fun ShoppingItemRow(
+    item: ShoppingItem,
+    viewModel: ShoppingViewModel,
+    onEditPrice: (Int) -> Unit = {},
+) {
     var unitExpanded by remember { mutableStateOf(false) }
 
     Card(
@@ -161,9 +208,15 @@ private fun ShoppingItemRow(item: ShoppingItem, viewModel: ShoppingViewModel) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, textDecoration = if (item.done) TextDecoration.LineThrough else TextDecoration.None,
                     style = MaterialTheme.typography.titleSmall)
-                if (item.estimatedPrice != null) {
-                    Text("$" + "%.2f".format(item.estimatedPrice), style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        if (item.estimatedPrice != null) "$${"%.2f".format(item.estimatedPrice)}" else "—",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    IconButton(onClick = { onEditPrice(item.id) }, modifier = Modifier.size(18.dp)) {
+                        Icon(Icons.Filled.Edit, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
 
@@ -203,13 +256,14 @@ private fun ShoppingItemRow(item: ShoppingItem, viewModel: ShoppingViewModel) {
 @Composable
 private fun ShoppingBottomSheet(
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String) -> Unit,
+    onConfirm: (String, String, String, Double?) -> Unit,
     strings: com.kitchencabinet.ui.i18n.Strings,
 ) {
     var name by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("1") }
     var selectedUnit by remember { mutableStateOf(UNITS[0]) }
     var unitExpanded by remember { mutableStateOf(false) }
+    var price by remember { mutableStateOf("") }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
@@ -258,8 +312,14 @@ private fun ShoppingBottomSheet(
                 }
             }
 
+            OutlinedTextField(value = price, onValueChange = { price = it.filter { c -> c.isDigit() || c == '.' } },
+                label = { Text(strings.shopping.estimatedPrice) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth(), singleLine = true, shape = RoundedCornerShape(12.dp),
+                prefix = { Text("$") })
+
             Button(
-                onClick = { if (name.isNotBlank()) onConfirm(name.trim(), quantity, selectedUnit) },
+                onClick = { if (name.isNotBlank()) onConfirm(name.trim(), quantity, selectedUnit, price.toDoubleOrNull()) },
                 enabled = name.isNotBlank(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(50)
             ) { Text(strings.shopping.add) }
 

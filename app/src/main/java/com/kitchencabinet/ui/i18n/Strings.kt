@@ -232,6 +232,8 @@ data class ShoppingStrings(
     val quantity: String,
     val unit: String,
     val add: String,
+    val total: String,
+    val estimatedPrice: String,
 )
 
 // ── ToolsScreen ─────────────────────────────────────────────
@@ -521,6 +523,8 @@ data class Strings(
                 quantity = "Cantidad",
                 unit = "Unidad",
                 add = "Agregar",
+                total = "Total estimado",
+                estimatedPrice = "Precio estimado",
             ),
             tools = ToolsStrings(
                 title = "Herramientas",
@@ -783,6 +787,8 @@ data class Strings(
                 quantity = "Quantity",
                 unit = "Unit",
                 add = "Add",
+                total = "Estimated total",
+                estimatedPrice = "Estimated price",
             ),
             tools = ToolsStrings(
                 title = "Tools",

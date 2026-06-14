@@ -42,6 +42,11 @@ class ShoppingViewModel(application: Application) : AndroidViewModel(application
         repo.updateShoppingItem(item.copy(unit = newUnit))
     }
 
+    fun updatePrice(id: Int, price: Double?) = viewModelScope.launch {
+        val item = repo.getShoppingById(id) ?: return@launch
+        repo.updateShoppingItem(item.copy(estimatedPrice = price))
+    }
+
     fun moveDoneToPantry() = viewModelScope.launch {
         val doneItems = repo.getDoneShoppingItems()
         for (item in doneItems) {
