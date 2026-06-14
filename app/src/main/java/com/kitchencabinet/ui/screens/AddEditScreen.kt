@@ -48,6 +48,7 @@ fun AddEditScreen(
     var categoryExpanded by remember { mutableStateOf(false) }
     var difficultyExpanded by remember { mutableStateOf(false) }
     var existingRecipe by remember { mutableStateOf<Recipe?>(null) }
+    var tagsInput by remember { mutableStateOf<List<String>>(emptyList()) }
 
     data class IngredientField(val name: String = "", val quantity: String = "", val key: Int = 0)
 
@@ -102,6 +103,7 @@ fun AddEditScreen(
                 }.ifEmpty { listOf(IngredientField(key = 0)) }
                 equipmentFields = r.equipment.ifEmpty { listOf("") }
                 fieldCounter = r.ingredients.size.coerceAtLeast(1)
+                tagsInput = r.tags
             }
         }
     }
@@ -137,6 +139,7 @@ fun AddEditScreen(
                                 ingredients = collectFields(),
                                 equipment = collectEquipment(),
                                 steps = stepsText.lines().map { it.trim() }.filter { it.isNotBlank() },
+                                tags = tagsInput,
                                 timeMinutes = cookTime.toIntOrNull() ?: 30,
                                 servings = servings.toIntOrNull() ?: 4,
                                 isFavorite = existingRecipe?.isFavorite ?: false,
@@ -393,6 +396,20 @@ fun AddEditScreen(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
                 maxLines = 8,
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            // ── Tags ──────────────────────────────────────────────────
+            Text(strings.addEdit.tags, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold,
+                fontFamily = NewsreaderFontFamily)
+            OutlinedTextField(
+                value = tagsInput.joinToString(", "),
+                onValueChange = { input ->
+                    tagsInput = input.split(",").map { it.trim() }.filter { it.isNotBlank() }
+                },
+                placeholder = { Text(strings.addEdit.tagsPlaceholder) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
                 shape = RoundedCornerShape(12.dp)
             )
 

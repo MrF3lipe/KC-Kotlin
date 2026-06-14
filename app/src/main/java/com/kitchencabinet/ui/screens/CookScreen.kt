@@ -3,6 +3,7 @@ package com.kitchencabinet.ui.screens
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.media.ToneGenerator
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -438,7 +439,7 @@ private fun TimerDisplayCard(
 }
 
 /**
- * Vibrate and play a short alarm sound when the timer expires.
+ * Vibrate and play an alarm when the timer expires.
  */
 private fun onTimerExpired(context: Context) {
     // Vibrate
@@ -450,41 +451,40 @@ private fun onTimerExpired(context: Context) {
             @Suppress("DEPRECATION")
             context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(
-                VibrationEffect.createOneShot(1500L, VibrationEffect.DEFAULT_AMPLITUDE)
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(1500L)
-        }
+        vibrator.vibrate(
+            VibrationEffect.createOneShot(2000L, VibrationEffect.DEFAULT_AMPLITUDE)
+        )
     } catch (_: Exception) {
         // Device may not support vibration
     }
 
-    // Play alarm sound if available
+    // Play beep alarm via ToneGenerator
     try {
-        val resId = context.resources.getIdentifier(
-            "alarm_timer",
-            "raw",
-            context.packageName
-        )
-        if (resId != 0) {
-            val mediaPlayer = MediaPlayer.create(context, resId)
-            mediaPlayer?.apply {
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-                setOnCompletionListener { release() }
-                setOnErrorListener { _, _, _ -> release(); true }
-                start()
-            }
-        }
+        val tone = ToneGenerator(ToneGenerator.STREAM_ALARM, 80)
+        tone.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 2000)
+        // ToneGenerator stops automatically after the duration
     } catch (_: Exception) {
-        // Audio playback not available
+        // Tone not available — try MediaPlayer
+        try {
+            val resId = context.resources.getIdentifier(
+                "alarm_timer", "raw", context.packageName
+            )
+            if (resId != 0) {
+                MediaPlayer.create(context, resId)?.apply {
+                    setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build()
+                    )
+                    setOnCompletionListener { release() }
+                    setOnErrorListener { _, _, _ -> release(); true }
+                    start()
+                }
+            }
+        } catch (_: Exception) {
+            // Audio playback not available
+        }
     }
 }
 

@@ -278,6 +278,19 @@ fun RecipeDetailScreen(
                     }
                 }
 
+                // ── Tags ──────────────────────────────────────────────────
+                if (r.tags.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        r.tags.forEach { tag ->
+                            SuggestionChip(
+                                onClick = {},
+                                label = { Text(tag, style = MaterialTheme.typography.labelSmall) }
+                            )
+                        }
+                    }
+                }
+
                 // ── Servings adjuster ───────────────────────────────────────────
                 Surface(
                     modifier = Modifier.fillMaxWidth(),

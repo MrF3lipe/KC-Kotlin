@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.kitchencabinet.notification.NotificationHelper
 import com.kitchencabinet.ui.components.AppShell
 import com.kitchencabinet.ui.i18n.LocalStrings
@@ -104,7 +105,11 @@ fun KitchenCabinetApp() {
         }
         composable(
             "detail/{id}",
-            arguments = listOf(navArgument("id") { type = NavType.IntType })
+            arguments = listOf(navArgument("id") { type = NavType.IntType }),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "kc-kotlin://recipe/{id}" },
+                navDeepLink { uriPattern = "https://kitchencabinet.app/recipe/{id}" },
+            )
         ) { back ->
             val id = back.arguments!!.getInt("id")
             RecipeDetailScreen(

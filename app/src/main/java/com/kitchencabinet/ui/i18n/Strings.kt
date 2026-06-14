@@ -71,6 +71,8 @@ data class AddEditStrings(
     val steps: String,
     val stepsPlaceholder: String,
     val camera: String,
+    val tags: String,
+    val tagsPlaceholder: String,
 )
 
 // ── CookScreen ──────────────────────────────────────────────
@@ -161,6 +163,7 @@ data class RecipeDetailStrings(
     val steps: String,
     val cook: String,
     val edit: String,
+    val tags: String,
 )
 
 // ── SettingsScreen ──────────────────────────────────────────
@@ -378,6 +381,8 @@ data class Strings(
                 steps = "Pasos",
                 stepsPlaceholder = "Un paso por línea",
                 camera = "Cámara",
+                tags = "Etiquetas",
+                tagsPlaceholder = "cena, rápida, italiana…",
             ),
             cook = CookStrings(
                 timerTitle = "Temporizador",
@@ -458,6 +463,7 @@ data class Strings(
                 steps = "Pasos",
                 cook = "Cocinar",
                 edit = "Editar",
+                tags = "Etiquetas",
             ),
             settings = SettingsStrings(
                 title = "Ajustes",
@@ -642,6 +648,8 @@ data class Strings(
                 steps = "Steps",
                 stepsPlaceholder = "One step per line",
                 camera = "Camera",
+                tags = "Tags",
+                tagsPlaceholder = "dinner, quick, italian…",
             ),
             cook = CookStrings(
                 timerTitle = "Set Timer",
@@ -722,6 +730,7 @@ data class Strings(
                 steps = "Steps",
                 cook = "Cook",
                 edit = "Edit",
+                tags = "Tags",
             ),
             settings = SettingsStrings(
                 title = "Settings",
