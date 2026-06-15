@@ -4,6 +4,10 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.rememberScrollState
@@ -62,18 +66,35 @@ fun AddEditScreen(
 
     val context = LocalContext.current
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showTitleError by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.toString()?.let { imageUrl = it }
+        uri?.let {
+            val path = copyToInternalStorage(context, it)
+            if (path != null) imageUrl = path
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val uri = createCameraUri()
+            cameraImageUri = uri
+            cameraLauncher.launch(uri)
+        }
     }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success: Boolean ->
         if (success) {
-            cameraImageUri?.toString()?.let { imageUrl = it }
+            cameraImageUri?.let { uri ->
+                val path = copyToInternalStorage(context, uri)
+                if (path != null) imageUrl = path
+            }
         }
     }
 
@@ -128,7 +149,8 @@ fun AddEditScreen(
                 actions = {
                     TextButton(
                         onClick = {
-                            if (title.isBlank()) return@TextButton
+                            if (title.isBlank()) { showTitleError = true; return@TextButton }
+                            showTitleError = false
                             val recipe = Recipe(
                                 id = existingRecipe?.id ?: 0,
                                 title = title.trim(),
@@ -171,11 +193,13 @@ fun AddEditScreen(
             SectionLabel(strings.addEdit.fieldTitle)
             OutlinedTextField(
                 value = title,
-                onValueChange = { title = it },
+                onValueChange = { title = it; showTitleError = false },
                 placeholder = { Text(strings.addEdit.fieldTitlePlaceholder) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                isError = showTitleError,
+                supportingText = if (showTitleError) {{ Text(strings.addEdit.titleRequired) }} else null
             )
 
             // Description
@@ -220,9 +244,13 @@ fun AddEditScreen(
                 }
                 FilledTonalButton(
                     onClick = {
-                        val uri = createCameraUri()
-                        cameraImageUri = uri
-                        cameraLauncher.launch(uri)
+                        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        } else {
+                            val uri = createCameraUri()
+                            cameraImageUri = uri
+                            cameraLauncher.launch(uri)
+                        }
                     },
                     modifier = Modifier.height(56.dp),
                     shape = RoundedCornerShape(12.dp)
@@ -427,4 +455,20 @@ private fun SectionLabel(text: String) {
         fontFamily = NewsreaderFontFamily,
         color = MaterialTheme.colorScheme.primary,
     )
+}
+
+private fun copyToInternalStorage(context: Context, uri: Uri): String? {
+    return try {
+        val dir = java.io.File(context.filesDir, "images")
+        dir.mkdirs()
+        val file = java.io.File(dir, "recipe_${System.currentTimeMillis()}.jpg")
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        file.absolutePath
+    } catch (e: Exception) {
+        null
+    }
 }

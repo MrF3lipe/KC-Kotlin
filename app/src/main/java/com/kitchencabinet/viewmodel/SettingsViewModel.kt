@@ -24,13 +24,26 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val notificationsConfig: StateFlow<NotificationsConfig?> = repo.notificationsConfig
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    fun setLocale(locale: String) = viewModelScope.launch { repo.setLocale(locale) }
-    fun setTheme(theme: String) = viewModelScope.launch { repo.setTheme(theme) }
-    fun setOnboarded(onboarded: Boolean) = viewModelScope.launch { repo.setOnboarded(onboarded) }
-    fun setCurrency(currency: String) = viewModelScope.launch { repo.setCurrency(currency) }
+    fun setLocale(locale: String) = viewModelScope.launch {
+        val current = repo.getSettingsOnce()
+        repo.saveSettings((current ?: SettingsEntity(id = 1)).copy(locale = locale))
+    }
+    fun setTheme(theme: String) = viewModelScope.launch {
+        val current = repo.getSettingsOnce()
+        repo.saveSettings((current ?: SettingsEntity(id = 1)).copy(theme = theme))
+    }
+    fun setOnboarded(onboarded: Boolean) = viewModelScope.launch {
+        val current = repo.getSettingsOnce()
+        repo.saveSettings((current ?: SettingsEntity(id = 1)).copy(onboarded = onboarded))
+    }
+    fun setCurrency(currency: String) = viewModelScope.launch {
+        val current = repo.getSettingsOnce()
+        repo.saveSettings((current ?: SettingsEntity(id = 1)).copy(currency = currency))
+    }
 
     fun setExpiryNotificationsEnabled(enabled: Boolean) = viewModelScope.launch {
-        repo.setExpiryNotificationsEnabled(enabled)
+        val current = repo.getNotificationsConfigOnce()
+        repo.saveNotificationsConfig((current ?: NotificationsConfig(id = 1)).copy(expiryEnabled = enabled))
         if (enabled) {
             NotificationHelper.scheduleDailyCheck(getApplication())
         } else {
@@ -38,8 +51,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
     fun setExpiryDaysBefore(days: Int) = viewModelScope.launch {
-        repo.setExpiryDaysBefore(days)
-        // Reschedule so the next check picks up the new threshold
+        val current = repo.getNotificationsConfigOnce()
+        repo.saveNotificationsConfig((current ?: NotificationsConfig(id = 1)).copy(expiryDaysBefore = days))
         val ctx = getApplication<Application>()
         NotificationHelper.cancelDailyCheck(ctx)
         NotificationHelper.scheduleDailyCheck(ctx)

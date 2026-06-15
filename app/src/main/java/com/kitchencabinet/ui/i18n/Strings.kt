@@ -9,6 +9,7 @@ data class NavStrings(
     val new: String,
     val pantry: String,
     val favorites: String,
+    val tools: String,
 )
 
 // ── HomeScreen ──────────────────────────────────────────────
@@ -48,6 +49,7 @@ data class AddEditStrings(
     val save: String,
     val fieldTitle: String,
     val fieldTitlePlaceholder: String,
+    val titleRequired: String,
     val fieldDescription: String,
     val fieldDescriptionPlaceholder: String,
     val fieldImage: String,
@@ -82,6 +84,7 @@ data class CookStrings(
     val timerStart: String,
     val finishTitle: String,
     val finishBody: String,
+    val finishBodyLastStep: String,
     val finishConfirm: String,
     val cancel: String,
     val previousStep: String,
@@ -146,6 +149,7 @@ data class PantryStrings(
     val addCategory: String,
     val emojiPlaceholder: String,
     val categoryName: String,
+    val itemsCount: String,
 )
 
 // ── RecipeDetailScreen ──────────────────────────────────────
@@ -325,12 +329,13 @@ data class Strings(
                 new = "Nueva",
                 pantry = "Despensa",
                 favorites = "Favoritos",
+                tools = "Herramientas",
             ),
             home = HomeStrings(
                 title = "¿Qué cocinamos hoy?",
                 placeholder = "Buscar recetas…",
                 emptyTitle = "No se encontraron resultados",
-                emptySubtitle = "Todavía no hay recetas. ¡Agregá una!",
+                emptySubtitle = "Todavía no hay recetas. ¡Agrega una!",
             ),
             search = SearchStrings(
                 title = "Buscar recetas",
@@ -344,7 +349,7 @@ data class Strings(
                 easy = "Fácil",
                 medium = "Media",
                 hard = "Difícil",
-                emptyHint = "Escribí para buscar recetas",
+                emptyHint = "Escribe para buscar recetas",
                 noResults = "Sin resultados para \"{query}\"",
                 groupCookable = "✅ Puedes cocinar",
                 groupAlmost = "🟡 Casi listas",
@@ -358,6 +363,7 @@ data class Strings(
                 save = "Guardar",
                 fieldTitle = "Título",
                 fieldTitlePlaceholder = "Ej: Sopa de Tomate",
+                titleRequired = "El título es obligatorio",
                 fieldDescription = "Descripción",
                 fieldDescriptionPlaceholder = "Breve descripción de la receta",
                 fieldImage = "Imagen",
@@ -390,6 +396,7 @@ data class Strings(
                 timerStart = "Iniciar",
                 finishTitle = "¿Terminar cocción?",
                 finishBody = "Todavía no llegaste al último paso. ¿Marcar como cocinada y volver?",
+                finishBodyLastStep = "¿Marcar como cocinada y volver?",
                 finishConfirm = "Finalizar",
                 cancel = "Cancelar",
                 previousStep = "Anterior",
@@ -404,7 +411,7 @@ data class Strings(
             favorites = FavoritesStrings(
                 title = "Favoritos",
                 emptyTitle = "Sin favoritos todavía",
-                emptySubtitle = "Tocá ♥ en cualquier receta para guardarla acá",
+                emptySubtitle = "Toca ♥ en cualquier receta para guardarla aquí",
             ),
             mealPlan = MealPlanStrings(
                 title = "Plan semanal",
@@ -448,6 +455,7 @@ data class Strings(
                 addCategory = "Añadir categoría",
                 emojiPlaceholder = "📦",
                 categoryName = "Nombre",
+                itemsCount = "{count} items",
             ),
             recipeDetail = RecipeDetailStrings(
                 deleteTitle = "¿Eliminar receta?",
@@ -521,7 +529,7 @@ data class Strings(
             shopping = ShoppingStrings(
                 title = "Lista de compras",
                 emptyTitle = "Tu lista está vacía",
-                emptySubtitle = "Agregá items desde recetas o manualmente",
+                emptySubtitle = "Agrega items desde recetas o manualmente",
                 moveToPantry = "Pasar a despensa",
                 clear = "Limpiar",
                 addItem = "Agregar item",
@@ -558,7 +566,7 @@ data class Strings(
                 codePlaceholder = "Código de barras",
                 search = "Buscar",
                 clear = "Limpiar",
-                fridgeDesc = "Sacá una foto de tu nevera para detectar ingredientes.",
+                fridgeDesc = "Saca una foto de tu nevera para detectar ingredientes.",
                 fridgeHint = "Foto del contenido de la nevera",
                 openCamera = "Abrir cámara",
                 retake = "Re-tomar",
@@ -592,6 +600,7 @@ data class Strings(
                 new = "New",
                 pantry = "Pantry",
                 favorites = "Favorites",
+                tools = "Tools",
             ),
             home = HomeStrings(
                 title = "What are we cooking today?",
@@ -625,6 +634,7 @@ data class Strings(
                 save = "Save",
                 fieldTitle = "Title",
                 fieldTitlePlaceholder = "E.g.: Tomato Soup",
+                titleRequired = "Title is required",
                 fieldDescription = "Description",
                 fieldDescriptionPlaceholder = "Brief description",
                 fieldImage = "Image",
@@ -657,6 +667,7 @@ data class Strings(
                 timerStart = "Start",
                 finishTitle = "Finish cooking?",
                 finishBody = "You haven't reached the last step yet. Mark as cooked and go back?",
+                finishBodyLastStep = "Mark as cooked and go back?",
                 finishConfirm = "Finish",
                 cancel = "Cancel",
                 previousStep = "Previous",
@@ -715,6 +726,7 @@ data class Strings(
                 addCategory = "Add category",
                 emojiPlaceholder = "📦",
                 categoryName = "Name",
+                itemsCount = "{count} items",
             ),
             recipeDetail = RecipeDetailStrings(
                 deleteTitle = "Delete recipe?",

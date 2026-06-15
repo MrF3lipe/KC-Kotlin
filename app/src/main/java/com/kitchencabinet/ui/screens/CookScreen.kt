@@ -125,11 +125,10 @@ fun CookScreen(
             onDismissRequest = { showFinishDialog = false },
             title = { Text(strings.cook.finishTitle) },
             text = {
-                if (currentStep < r.steps.size - 1) {
-                    Text(strings.cook.finishBody)
-                } else {
-                    Text(strings.cook.finishBody)
-                }
+                Text(
+                    if (currentStep < r.steps.size - 1) strings.cook.finishBody
+                    else strings.cook.finishBodyLastStep
+                )
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -159,7 +158,9 @@ fun CookScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        if (currentStep > 0 || timerRunning) showFinishDialog = true else onBack()
+                    }) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = strings.nav.search)
                     }
                 },

@@ -53,7 +53,7 @@ fun HomeScreen(
         item {
             Text(
                 text = strings.home.title,
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.headlineMedium,
                 fontFamily = NewsreaderFontFamily,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -125,7 +125,7 @@ fun HomeScreen(
                         color = when {
                             isSelected && chipTone == "primary" -> MaterialTheme.colorScheme.primary
                             isSelected && chipTone == "secondary" -> MaterialTheme.colorScheme.secondaryContainer
-                            isSelected -> MaterialTheme.colorScheme.onBackground
+                            isSelected -> MaterialTheme.colorScheme.primaryContainer
                             else -> MaterialTheme.colorScheme.surfaceContainerHigh
                         }
                     ) {
@@ -137,7 +137,7 @@ fun HomeScreen(
                             color = when {
                                 isSelected && chipTone == "primary" -> MaterialTheme.colorScheme.onPrimary
                                 isSelected && chipTone == "secondary" -> MaterialTheme.colorScheme.onSecondaryContainer
-                                isSelected -> MaterialTheme.colorScheme.background
+                                isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
                                 else -> MaterialTheme.colorScheme.onSurfaceVariant
                             },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)

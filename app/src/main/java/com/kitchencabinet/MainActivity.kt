@@ -32,11 +32,20 @@ class MainActivity : ComponentActivity() {
         NotificationHelper.createChannel(this)
         NotificationHelper.scheduleDailyCheck(this)
         setContent {
-            val darkMode = remember { mutableStateOf(false) }
+            val settingsViewModel: SettingsViewModel = viewModel()
+            val settings by settingsViewModel.settings.collectAsState()
+            val initialDark = settings?.theme == "dark"
+            val darkMode = remember { mutableStateOf(initialDark) }
+
+            LaunchedEffect(settings?.theme) {
+                settings?.theme?.let { theme ->
+                    darkMode.value = theme == "dark"
+                }
+            }
 
             KitchenCabinetTheme(darkTheme = darkMode.value) {
                 CompositionLocalProvider(LocalDarkMode provides darkMode) {
-                    KitchenCabinetApp()
+                    KitchenCabinetApp(settingsViewModel = settingsViewModel)
                 }
             }
         }
@@ -44,9 +53,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun KitchenCabinetApp() {
+fun KitchenCabinetApp(settingsViewModel: SettingsViewModel = viewModel()) {
     val navController = rememberNavController()
-    val settingsViewModel: SettingsViewModel = viewModel()
     val settings by settingsViewModel.settings.collectAsState()
     val strings = if (settings?.locale == "en") Strings.en else Strings.es
 
@@ -159,7 +167,7 @@ fun KitchenCabinetApp() {
             )
         }
         composable("settings") {
-            SettingsScreen(onBack = { navController.popBackStack() })
+            SettingsScreen(onBack = { navController.popBackStack() }, navController = navController)
         }
     }
     }

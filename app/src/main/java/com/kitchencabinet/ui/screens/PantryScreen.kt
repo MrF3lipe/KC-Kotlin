@@ -41,7 +41,6 @@ fun PantryScreen(
     var editItem by remember { mutableStateOf<PantryItem?>(null) }
 
     val allItems = groupedItems.flatMap { it.items }
-    val totalItems = categories.sumOf { cat -> groupedItems.find { it.category.name == cat.name }?.items?.size ?: 0 }
 
     // Add/Edit Dialog
     if (showDialog) {
@@ -74,13 +73,22 @@ fun PantryScreen(
         )
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize().imePadding()) {
         if (allItems.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Filled.Kitchen, null, Modifier.size(64.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(12.dp))
                     Text(strings.pantry.emptyTitle, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.height(24.dp))
+                    Button(
+                        onClick = { showDialog = true },
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Icon(Icons.Filled.Add, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(strings.pantry.addIngredient)
+                    }
                 }
             }
         } else {
@@ -94,14 +102,14 @@ fun PantryScreen(
                     Column(modifier = Modifier.padding(bottom = 8.dp)) {
                         Text(
                             strings.pantry.title,
-                            style = MaterialTheme.typography.displayMedium,
+                            style = MaterialTheme.typography.headlineMedium,
                             fontFamily = NewsreaderFontFamily,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onBackground,
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "$totalItems / $totalItems items",
+                            strings.pantry.itemsCount.replace("{count}", "${allItems.size}"),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 1.sp,
@@ -167,7 +175,7 @@ fun PantryScreen(
                             Spacer(Modifier.width(8.dp))
                             Text(catName, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
                             Spacer(Modifier.weight(1f))
-                            Text("${group.items.size} items", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(strings.pantry.itemsCount.replace("{count}", "${group.items.size}"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
 

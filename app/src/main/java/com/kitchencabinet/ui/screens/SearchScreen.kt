@@ -114,7 +114,7 @@ fun SearchScreen(
             // Title
             Text(
                 text = strings.search.title,
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.headlineMedium,
                 fontFamily = com.kitchencabinet.ui.theme.NewsreaderFontFamily,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground,

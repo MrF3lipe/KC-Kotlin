@@ -3,10 +3,12 @@ package com.kitchencabinet.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Kitchen
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Kitchen
 import androidx.compose.material.icons.outlined.Search
@@ -35,6 +37,7 @@ fun BottomNavBar(navController: NavController) {
         BottomNavItem("search", strings.nav.search, Icons.Filled.Search, Icons.Outlined.Search),
         BottomNavItem("addedit", strings.nav.new, Icons.Filled.AddCircle, Icons.Outlined.AddCircle),
         BottomNavItem("pantry", strings.nav.pantry, Icons.Filled.Kitchen, Icons.Outlined.Kitchen),
+        BottomNavItem("tools", strings.nav.tools, Icons.Filled.Build, Icons.Outlined.Build),
     )
 
     val backStack by navController.currentBackStackEntryAsState()
@@ -50,6 +53,7 @@ fun BottomNavBar(navController: NavController) {
                 "search" -> currentRoute == "search"
                 "addedit" -> currentRoute?.startsWith("addedit") == true
                 "pantry" -> currentRoute == "pantry"
+                "tools" -> currentRoute == "tools"
                 else -> currentRoute == item.route
             }
 

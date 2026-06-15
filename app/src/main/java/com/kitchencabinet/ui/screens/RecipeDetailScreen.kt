@@ -108,9 +108,7 @@ fun RecipeDetailScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+            modifier = Modifier.fillMaxSize()
         ) {
             // ── Image hero (aspect 4:3) ─────────────────────────────────────────
             Box(
@@ -195,9 +193,10 @@ fun RecipeDetailScreen(
                         // Favorite
                         Surface(
                             onClick = {
+                                val newFav = !r.isFavorite
+                                recipe = r.copy(isFavorite = newFav)
                                 scope.launch {
-                                    viewModel.toggleFavorite(r.id, !r.isFavorite)
-                                    recipe = viewModel.getById(r.id)
+                                    viewModel.toggleFavorite(r.id, newFav)
                                 }
                             },
                             shape = RoundedCornerShape(50),
@@ -219,17 +218,19 @@ fun RecipeDetailScreen(
             // ── Overlapping content panel ────────────────────────────────────────
             Column(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
                     .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    .background(MaterialTheme.colorScheme.background),
+                    .background(MaterialTheme.colorScheme.background)
+                    .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Spacer(Modifier.height(8.dp))
 
-                // Badge row
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -242,15 +243,47 @@ fun RecipeDetailScreen(
                     Badge(label = "${r.timeMinutes} min", variant = "muted")
                 }
 
-                // Title
-                Text(
-                    text = r.title,
-                    style = MaterialTheme.typography.displaySmall,
-                    fontFamily = NewsreaderFontFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    lineHeight = 28.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
+                // Title + actions
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = r.title,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontFamily = NewsreaderFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 28.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        IconButton(
+                            onClick = { onEdit(r.id) },
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                Icons.Filled.Edit,
+                                contentDescription = strings.recipeDetail.edit,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = { showDeleteDialog = true },
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                Icons.Filled.Delete,
+                                contentDescription = strings.recipeDetail.delete,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
 
                 // Description
                 if (r.description.isNotBlank()) {
@@ -258,12 +291,16 @@ fun RecipeDetailScreen(
                         text = r.description,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
                 }
 
                 // Cooked count
                 if (r.cookedCount > 0) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Icon(
                             Icons.Filled.CheckCircle, contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)
@@ -358,9 +395,10 @@ fun RecipeDetailScreen(
                         for (starIndex in 1..5) {
                             IconButton(
                                 onClick = {
+                                    val newRating = starIndex.toFloat()
+                                    recipe = r.copy(rating = newRating)
                                     scope.launch {
-                                        viewModel.update(r.copy(rating = starIndex.toFloat()))
-                                        recipe = viewModel.getById(r.id)
+                                        viewModel.update(r.copy(rating = newRating))
                                     }
                                 },
                                 modifier = Modifier.size(36.dp)
@@ -569,27 +607,13 @@ fun RecipeDetailScreen(
             }
         }
 
-        // ── Edit/Delete FABs ─────────────────────────────────────────────────
+        // ── Cook FAB ─────────────────────────────────────────────────────────
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            SmallFloatingActionButton(
-                onClick = { showDeleteDialog = true },
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer,
-            ) {
-                Icon(Icons.Filled.Delete, contentDescription = strings.recipeDetail.delete, modifier = Modifier.size(20.dp))
-            }
-            SmallFloatingActionButton(
-                onClick = { onEdit(r.id) },
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            ) {
-                Icon(Icons.Filled.Edit, contentDescription = strings.recipeDetail.edit, modifier = Modifier.size(20.dp))
-            }
             ExtendedFloatingActionButton(
                 onClick = { onCook(r.id) },
                 containerColor = MaterialTheme.colorScheme.primary,

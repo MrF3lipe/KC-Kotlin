@@ -1,5 +1,6 @@
 package com.kitchencabinet.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -62,12 +63,27 @@ private fun CompactRecipeCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column {
-            AsyncImage(
-                model = recipe.image,
-                contentDescription = recipe.title,
-                modifier = Modifier.fillMaxWidth().height(140.dp),
-                contentScale = ContentScale.Crop,
-            )
+            if (recipe.image.isNotBlank()) {
+                AsyncImage(
+                    model = recipe.image,
+                    contentDescription = recipe.title,
+                    modifier = Modifier.fillMaxWidth().height(140.dp),
+                    contentScale = ContentScale.Crop,
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(140.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = recipe.title.take(2).uppercase(),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
+                        fontFamily = NewsreaderFontFamily,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
 
             Column(
                 modifier = Modifier.padding(16.dp),

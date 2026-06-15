@@ -71,7 +71,7 @@ private fun AppHeader(
                 )
             },
             navigationIcon = {
-                IconButton(onClick = { navController.navigate("settings") }) {
+                IconButton(onClick = { navController.navigate("settings") { launchSingleTop = true } }) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = strings.appShell.settingsContentDesc,
@@ -80,7 +80,7 @@ private fun AppHeader(
                 }
             },
             actions = {
-                IconButton(onClick = { navController.navigate("favorites") }) {
+                IconButton(onClick = { navController.navigate("favorites") { popUpTo("home") { saveState = true }; launchSingleTop = true; restoreState = true } }) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = strings.appShell.favoritesContentDesc,

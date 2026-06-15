@@ -1,0 +1,43 @@
+﻿1: [FIXED] Dark mode persistence (LaunchedEffect + settings init)
+2: [FIXED] Settings buttons not working (root cause: UPDATE when no row existed; now uses saveSettings with create-if-not-exists)
+3: [FIXED] Quick access buttons (navController passed to SettingsScreen)
+4: [FIXED] Title block on Home (displaySmall -> headlineMedium)
+5: [FIXED] English texts (visible strings moved to i18n; contentDescriptions are accessibility-only)
+6: [FEATURE] Filter layout redesign
+7: [FIXED] Recipe detail panel layout (removed outer horizontal padding)
+8: [FIXED] Settings multi-tap crash (launchSingleTop)
+9: [FIXED] Explore button stays on Favorites (popUpTo + saveState + restoreState)
+10: [FEATURE] Unit selection for ingredients
+11: [FIXED] Camera crash (permission request launcher)
+12: [FIXED] Gallery images lost after close (copy to filesDir/images/)
+13: [FEATURE] Share image should include recipe image
+14: [PENDING] URL/QR sharing (DB not configured)
+15: [FIXED] Edit/Delete FABs position (moved to IconButton next to title)
+16: [FEATURE] Timer hours, auto-advance, narration
+17: [FIXED] Search screen oversized (title headlineMedium)
+18: [FIXED] Rioplatense slang removed (voseo -> standard forms)
+19: [FIXED] Chips always black/white (primaryContainer/onPrimaryContainer)
+20: [FIXED] Stars double tap (optimistic local update)
+21: [FIXED] Bottom nav missing Tools (5th item added)
+22: [FIXED] Save without title gives no feedback (error state + supportingText)
+23: [FIXED] Recipe with only name looks bad (content panel now fills screen with weight(1f))
+24: [FEATURE] Add ingredients from pantry
+25: [FEATURE] Consume pantry on cook
+26: [FEATURE] Equipment from pantry
+27: [FIXED] Keyboard bouncing in pantry (adjustNothing + imePadding)
+28: [FEATURE] Better unit display descriptions
+29: [FIXED] White space in search/pantry (title sizes, items count, layout fixes)
+30: [FEATURE] Remove select option in pantry
+31: [FIXED] No image fallback (CompactRecipeCard shows initials)
+32: [FEATURE] Rotation handling
+33: [FEATURE] App icon
+34: [FEATURE] Search already groups "Almost ready"
+35: [FEATURE] Shopping cart navigation issue
+36: [FIXED] Empty pantry can't add (Button in empty state)
+37: [FEATURE] Substitute button picker
+38: [FIXED] Wrong finish cooking message (finishBodyLastStep)
+39: [FIXED] Back button missing finish dialog (now shows dialog if progress exists)
+40: [FEATURE] More descriptive expiry dates
+41: [FIXED] Favorites double tap (optimistic local update)
+42: [CLOSED] End of bug report
+43: [PENDING] Update checklist
