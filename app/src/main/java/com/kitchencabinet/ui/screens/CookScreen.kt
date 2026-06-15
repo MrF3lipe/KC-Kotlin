@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kitchencabinet.data.Recipe
 import com.kitchencabinet.ui.i18n.LocalStrings
+import com.kitchencabinet.viewmodel.PantryViewModel
 import com.kitchencabinet.viewmodel.RecipeViewModel
 import kotlinx.coroutines.delay
 
@@ -35,9 +36,11 @@ import kotlinx.coroutines.delay
 fun CookScreen(
     recipeId: Int,
     onBack: () -> Unit,
-    viewModel: RecipeViewModel = viewModel()
+    viewModel: RecipeViewModel = viewModel(),
+    pantryViewModel: PantryViewModel = viewModel()
 ) {
     val strings = LocalStrings.current
+    val pantryItems by pantryViewModel.pantryItems.collectAsState()
     var recipe by remember { mutableStateOf<Recipe?>(null) }
     var currentStep by remember { mutableIntStateOf(0) }
     var timerRunning by remember { mutableStateOf(false) }
@@ -45,6 +48,7 @@ fun CookScreen(
     var showTimerDialog by remember { mutableStateOf(false) }
     var timerInput by remember { mutableStateOf("") }
     var showFinishDialog by remember { mutableStateOf(false) }
+    var consumePantry by remember { mutableStateOf(true) }
     val context = LocalContext.current
 
     // Load recipe
@@ -125,15 +129,46 @@ fun CookScreen(
             onDismissRequest = { showFinishDialog = false },
             title = { Text(strings.cook.finishTitle) },
             text = {
-                Text(
-                    if (currentStep < r.steps.size - 1) strings.cook.finishBody
-                    else strings.cook.finishBodyLastStep
-                )
+                Column {
+                    Text(
+                        if (currentStep < r.steps.size - 1) strings.cook.finishBody
+                        else strings.cook.finishBodyLastStep
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = consumePantry, onCheckedChange = { consumePantry = it })
+                        Spacer(Modifier.width(8.dp))
+                        Column {
+                            Text(strings.cook.consumePantry, style = MaterialTheme.typography.bodyMedium)
+                            Text(strings.cook.consumePantryDesc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
             },
             confirmButton = {
                 TextButton(onClick = {
                     showFinishDialog = false
                     viewModel.incrementCookedCount(recipeId)
+                    if (consumePantry) {
+                        r.ingredients.forEach { ing ->
+                            val nameLower = ing.name.lowercase()
+                            pantryItems.filter { it.name.lowercase().contains(nameLower) || nameLower.contains(it.name.lowercase()) }
+                                .forEach { item ->
+                                    val qtyStr = ing.quantity.filter { it.isDigit() || it == '.' }
+                                    val qty = qtyStr.toDoubleOrNull()
+                                    if (qty != null && qty > 0) {
+                                        val newQty = item.quantity - qty
+                                        if (newQty <= 0) {
+                                            pantryViewModel.delete(item)
+                                        } else {
+                                            pantryViewModel.adjustQuantity(item, -qty)
+                                        }
+                                    } else {
+                                        pantryViewModel.delete(item)
+                                    }
+                                }
+                        }
+                    }
                     onBack()
                 }) {
                     Text(strings.cook.finishConfirm, color = MaterialTheme.colorScheme.secondary)

@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +31,7 @@ import com.kitchencabinet.data.Ingredient
 import com.kitchencabinet.data.Recipe
 import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
+import com.kitchencabinet.viewmodel.PantryViewModel
 import com.kitchencabinet.viewmodel.RecipeViewModel
 import kotlinx.coroutines.launch
 
@@ -38,9 +40,14 @@ import kotlinx.coroutines.launch
 fun AddEditScreen(
     recipeId: Int?,
     onBack: () -> Unit,
-    viewModel: RecipeViewModel = viewModel()
+    viewModel: RecipeViewModel = viewModel(),
+    pantryViewModel: PantryViewModel = viewModel()
 ) {
     val strings = LocalStrings.current
+    val pantryItems by pantryViewModel.pantryItems.collectAsState()
+    var showPantrySheet by remember { mutableStateOf(false) }
+    var pantryTargetIndex by remember { mutableIntStateOf(-1) }
+    var pantryIsEquipment by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("General") }
@@ -136,6 +143,23 @@ fun AddEditScreen(
     fun collectEquipment() = equipmentFields
         .filter { it.isNotBlank() }
         .map { it.trim() }
+
+    fun onPantryPick(name: String, quantity: String?) {
+        if (pantryIsEquipment) {
+            if (pantryTargetIndex in equipmentFields.indices) {
+                equipmentFields = equipmentFields.toMutableList().apply {
+                    this[pantryTargetIndex] = name
+                }
+            }
+        } else {
+            if (pantryTargetIndex in ingredientFields.indices) {
+                ingredientFields = ingredientFields.toMutableList().apply {
+                    this[pantryTargetIndex] = this[pantryTargetIndex].copy(name = name, quantity = quantity ?: "")
+                }
+            }
+        }
+        showPantrySheet = false
+    }
 
     Scaffold(
         topBar = {
@@ -342,6 +366,13 @@ fun AddEditScreen(
             SectionLabel(strings.addEdit.ingredients)
             ingredientFields.forEachIndexed { idx, field ->
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    IconButton(
+                        onClick = { pantryTargetIndex = idx; pantryIsEquipment = false; showPantrySheet = true },
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(Icons.Filled.List, strings.addEdit.pickFromPantry, Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary)
+                    }
                     OutlinedTextField(
                         value = field.name,
                         onValueChange = { newName ->
@@ -387,7 +418,14 @@ fun AddEditScreen(
             // Equipment
             SectionLabel(strings.addEdit.utensils)
             equipmentFields.forEachIndexed { idx, eq ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    IconButton(
+                        onClick = { pantryTargetIndex = idx; pantryIsEquipment = true; showPantrySheet = true },
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(Icons.Filled.List, strings.addEdit.pickFromPantry, Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary)
+                    }
                     OutlinedTextField(
                         value = eq,
                         onValueChange = { newEq ->
@@ -442,6 +480,40 @@ fun AddEditScreen(
             )
 
             Spacer(Modifier.height(24.dp))
+        }
+    }
+
+    // Pantry picker bottom sheet
+    if (showPantrySheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showPantrySheet = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(strings.addEdit.pantryItems, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(12.dp))
+                if (pantryItems.isEmpty()) {
+                    Text(strings.addEdit.noPantryItems, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    pantryItems.forEach { item ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().clickable { onPantryPick(item.name, null) }.padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(item.name, style = MaterialTheme.typography.bodyMedium)
+                                Text("${item.quantity} ${item.unit}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            FilledTonalButton(onClick = {
+                                onPantryPick(item.name, "${item.quantity.toIntOrNull() ?: item.quantity} ${item.unit}")
+                            }, shape = RoundedCornerShape(50)) {
+                                Text(strings.addEdit.pickFromPantry, style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(24.dp))
+            }
         }
     }
 }
