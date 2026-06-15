@@ -3,6 +3,7 @@ package com.kitchencabinet.ui.screens
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -319,6 +321,7 @@ private fun generateRecipeImage(context: Context, recipe: Recipe): Bitmap {
     val bodySize = 36f
     val lineSpace = 52f
     val sectionSpace = 40f
+    val imageHeight = 540f
 
     val titlePaint = Paint().apply {
         color = android.graphics.Color.parseColor("#9A4028")
@@ -339,8 +342,31 @@ private fun generateRecipeImage(context: Context, recipe: Recipe): Bitmap {
         isAntiAlias = true
     }
 
+    // Try to load recipe image
+    var headerImage: Bitmap? = null
+    if (recipe.image.isNotBlank()) {
+        try {
+            val url = URL(recipe.image)
+            val connection = url.openConnection()
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            val input = connection.getInputStream()
+            val raw = BitmapFactory.decodeStream(input)
+            input.close()
+            if (raw != null) {
+                val cropW = raw.width
+                val cropH = (cropW * 9f / 16f).toInt().coerceAtMost(raw.height)
+                val offsetY = ((raw.height - cropH) / 2).coerceAtLeast(0)
+                headerImage = Bitmap.createBitmap(raw, 0, offsetY, cropW, cropH)
+                raw.recycle()
+            }
+        } catch (_: Exception) { }
+    }
+
+    val topOffset = if (headerImage != null) imageHeight + sectionSpace else 0f
+
     // Measure total height
-    var y = pad + titleSize + sectionSpace
+    var y = topOffset + pad + titleSize + sectionSpace
     y += sectionSize + sectionSpace // Ingredients
     for (ing in recipe.ingredients) { y += lineSpace }
     y += sectionSize + sectionSpace // Steps
@@ -353,8 +379,17 @@ private fun generateRecipeImage(context: Context, recipe: Recipe): Bitmap {
     val canvas = Canvas(bitmap)
     canvas.drawColor(android.graphics.Color.WHITE)
 
-    // Title
+    // Draw header image if available
     var py = pad
+    if (headerImage != null) {
+        val scaled = Bitmap.createScaledBitmap(headerImage, width, imageHeight.toInt(), true)
+        canvas.drawBitmap(scaled, 0f, 0f, null)
+        scaled.recycle()
+        headerImage.recycle()
+        py = imageHeight + sectionSpace + pad
+    }
+
+    // Title
     canvas.drawText(recipe.title, pad, py + titleSize, titlePaint)
     py += titleSize + sectionSpace
 

@@ -22,7 +22,14 @@ import com.kitchencabinet.ui.i18n.LocalStrings
 import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.ShoppingViewModel
 
-private val UNITS = listOf("ud", "g", "kg", "ml", "L", "tsp", "tbsp", "cup")
+private val UNITS = listOf("ud", "g", "kg", "ml", "L")
+private val UNIT_LABELS = mapOf(
+    "ud" to "ud (unidades)",
+    "g" to "g (gramos)",
+    "kg" to "kg (kilogramos)",
+    "ml" to "ml (mililitros)",
+    "L" to "L (litros)",
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -240,7 +247,7 @@ private fun ShoppingItemRow(
                 }
                 DropdownMenu(expanded = unitExpanded, onDismissRequest = { unitExpanded = false }) {
                     UNITS.forEach { unit ->
-                        DropdownMenuItem(text = { Text(unit) }, onClick = { viewModel.updateUnit(item.id, unit); unitExpanded = false })
+                        DropdownMenuItem(text = { Text(UNIT_LABELS[unit] ?: unit) }, onClick = { viewModel.updateUnit(item.id, unit); unitExpanded = false })
                     }
                 }
             }
@@ -307,7 +314,7 @@ private fun ShoppingBottomSheet(
                     modifier = Modifier.fillMaxWidth().menuAnchor(), singleLine = true, shape = RoundedCornerShape(12.dp))
                 ExposedDropdownMenu(expanded = unitExpanded, onDismissRequest = { unitExpanded = false }) {
                     UNITS.forEach { unit ->
-                        DropdownMenuItem(text = { Text(unit) }, onClick = { selectedUnit = unit; unitExpanded = false })
+                        DropdownMenuItem(text = { Text(UNIT_LABELS[unit] ?: unit) }, onClick = { selectedUnit = unit; unitExpanded = false })
                     }
                 }
             }

@@ -1,5 +1,6 @@
 package com.kitchencabinet.ui.screens
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -69,6 +71,8 @@ fun RecipeDetailScreen(
     viewModel: RecipeViewModel = viewModel()
 ) {
     val strings = LocalStrings.current
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     var recipe by remember { mutableStateOf<Recipe?>(null) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var currentServings by remember { mutableStateOf<Int?>(null) }
@@ -110,11 +114,14 @@ fun RecipeDetailScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // ── Image hero (aspect 4:3) ─────────────────────────────────────────
+            // ── Image hero (aspect 4:3 portrait, capped landscape) ─────────────
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(4f / 3f)
+                    .then(
+                        if (isLandscape) Modifier.heightIn(max = 200.dp)
+                        else Modifier.aspectRatio(4f / 3f)
+                    )
             ) {
                 if (r.image.isNotBlank()) {
                     AsyncImage(

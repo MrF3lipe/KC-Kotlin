@@ -25,7 +25,14 @@ import com.kitchencabinet.ui.theme.NewsreaderFontFamily
 import com.kitchencabinet.viewmodel.CategoryWithItems
 import com.kitchencabinet.viewmodel.PantryViewModel
 
-private val UNITS = listOf("ud", "g", "kg", "ml", "L", "tsp", "tbsp", "cup")
+private val UNITS = listOf("ud", "g", "kg", "ml", "L")
+private val UNIT_LABELS = mapOf(
+    "ud" to "ud (unidades)",
+    "g" to "g (gramos)",
+    "kg" to "kg (kilogramos)",
+    "ml" to "ml (mililitros)",
+    "L" to "L (litros)",
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -182,7 +189,6 @@ fun PantryScreen(
                     items(group.items, key = { "pantry_${it.id}" }) { item ->
                         PantryItemRow(
                             item = item,
-                            onToggleAvailable = { viewModel.toggleAvailable(item) },
                             onAdjustQuantity = { delta -> viewModel.adjustQuantity(item, delta) },
                             onEdit = { editItem = item; showDialog = true },
                             onDelete = { viewModel.delete(item) },
@@ -198,7 +204,6 @@ fun PantryScreen(
 @Composable
 private fun PantryItemRow(
     item: PantryItem,
-    onToggleAvailable: (PantryItem) -> Unit,
     onAdjustQuantity: (Double) -> Unit,
     onEdit: (PantryItem) -> Unit,
     onDelete: (PantryItem) -> Unit,
@@ -207,8 +212,7 @@ private fun PantryItemRow(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (item.available) MaterialTheme.colorScheme.surfaceContainerLow
-            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
         shape = RoundedCornerShape(12.dp),
     ) {
@@ -216,13 +220,11 @@ private fun PantryItemRow(
             modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Checkbox(checked = item.available, onCheckedChange = { onToggleAvailable(item) })
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     item.name, style = MaterialTheme.typography.titleSmall, maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textDecoration = if (!item.available) TextDecoration.LineThrough else TextDecoration.None
+                    overflow = TextOverflow.Ellipsis
                 )
                 if (item.expiresAt != null && item.expiresAt > 0) {
                     val daysLeft = (item.expiresAt - System.currentTimeMillis()) / 86400000
@@ -365,7 +367,7 @@ private fun PantryItemBottomSheet(
                     modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp))
                 ExposedDropdownMenu(expanded = unitExpanded, onDismissRequest = { unitExpanded = false }) {
                     UNITS.forEach { unit ->
-                        DropdownMenuItem(text = { Text(unit) }, onClick = { selectedUnit = unit; unitExpanded = false })
+                        DropdownMenuItem(text = { Text(UNIT_LABELS[unit] ?: unit) }, onClick = { selectedUnit = unit; unitExpanded = false })
                     }
                 }
             }

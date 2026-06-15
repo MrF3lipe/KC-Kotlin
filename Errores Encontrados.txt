@@ -10,7 +10,7 @@
 10: [FEATURE] Unit selection for ingredients
 11: [FIXED] Camera crash (permission request launcher)
 12: [FIXED] Gallery images lost after close (copy to filesDir/images/)
-13: [FEATURE] Share image should include recipe image
+13: [FIXED] Share image now includes recipe photo
 14: [PENDING] URL/QR sharing (DB not configured)
 15: [FIXED] Edit/Delete FABs position (moved to IconButton next to title)
 16: [FEATURE] Timer hours, auto-advance, narration
@@ -25,11 +25,11 @@
 25: [FEATURE] Consume pantry on cook
 26: [FEATURE] Equipment from pantry
 27: [FIXED] Keyboard bouncing in pantry (adjustNothing + imePadding)
-28: [FEATURE] Better unit display descriptions
+28: [FIXED] Better unit display descriptions (g→g (gramos), etc.)
 29: [FIXED] White space in search/pantry (title sizes, items count, layout fixes)
-30: [FEATURE] Remove select option in pantry
+30: [FIXED] Remove checkbox selection in pantry
 31: [FIXED] No image fallback (CompactRecipeCard shows initials)
-32: [FEATURE] Rotation handling
+32: [FIXED] Rotation layout (image hero capped in landscape)
 33: [FEATURE] App icon
 34: [FEATURE] Search already groups "Almost ready"
 35: [FEATURE] Shopping cart navigation issue
@@ -37,7 +37,7 @@
 37: [FEATURE] Substitute button picker
 38: [FIXED] Wrong finish cooking message (finishBodyLastStep)
 39: [FIXED] Back button missing finish dialog (now shows dialog if progress exists)
-40: [FEATURE] More descriptive expiry dates
+40: [FIXED] More descriptive expiry dates (Vence hoy/mañana/en X días)
 41: [FIXED] Favorites double tap (optimistic local update)
 42: [CLOSED] End of bug report
 43: [PENDING] Update checklist
