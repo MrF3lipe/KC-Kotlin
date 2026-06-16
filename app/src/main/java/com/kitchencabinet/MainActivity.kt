@@ -95,6 +95,7 @@ fun KitchenCabinetApp(settingsViewModel: SettingsViewModel = viewModel()) {
             AppShell(navController = navController, title = "Search") { padding ->
                 SearchScreen(
                     onRecipeClick = { navController.navigate("detail/$it") },
+                    onNavigateToShopping = { navController.navigate("shopping") { launchSingleTop = true } },
                     modifier = Modifier.padding(padding)
                 )
             }

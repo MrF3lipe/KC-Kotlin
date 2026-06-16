@@ -30,6 +30,7 @@ import com.kitchencabinet.viewmodel.ShoppingViewModel
 @Composable
 fun SearchScreen(
     onRecipeClick: (Int) -> Unit,
+    onNavigateToShopping: () -> Unit = {},
     viewModel: RecipeViewModel = viewModel(),
     pantryViewModel: PantryViewModel = viewModel(),
     shoppingViewModel: ShoppingViewModel = viewModel(),
@@ -39,6 +40,7 @@ fun SearchScreen(
     val query by viewModel.searchQuery.collectAsState()
     val results by viewModel.recipes.collectAsState()
     val pantryItems by pantryViewModel.pantryItems.collectAsState()
+    val shoppingItems by shoppingViewModel.shoppingItems.collectAsState()
     val focusRequester = remember { FocusRequester() }
 
     var selectedIngredients by remember { mutableStateOf<Set<String>>(emptySet()) }
@@ -105,8 +107,11 @@ fun SearchScreen(
         )
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        // Header area with padding
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Header area with padding
         Column(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -343,10 +348,27 @@ fun SearchScreen(
                                 }
                             }
                         }
-                    }
+            }
+        }
+
+        // Shopping cart FAB
+        if (shoppingItems.isNotEmpty()) {
+            FloatingActionButton(
+                onClick = onNavigateToShopping,
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                BadgedBox(badge = {
+                    Badge { Text("${shoppingItems.size}", style = MaterialTheme.typography.labelSmall) }
+                }) {
+                    Icon(Icons.Filled.ShoppingCart, contentDescription = null)
                 }
             }
         }
+    }
+}
     }
 }
 
