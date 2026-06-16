@@ -31,8 +31,8 @@
 31: [FIXED] No image fallback (CompactRecipeCard shows initials)
 32: [FIXED] Rotation layout (image hero capped in landscape)
 33: [FEATURE] App icon
-34: [FEATURE] Search already groups "Almost ready"
-35: [FEATURE] Shopping cart navigation issue
+34: [FIXED] Search already groups "Almost ready"
+35: [FIXED] Shopping cart FAB navigation in search
 36: [FIXED] Empty pantry can't add (Button in empty state)
 37: [FEATURE] Substitute button picker
 38: [FIXED] Wrong finish cooking message (finishBodyLastStep)

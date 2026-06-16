@@ -24,6 +24,7 @@ data class HomeStrings(
 data class SearchStrings(
     val title: String,
     val placeholder: String,
+    val filterBtn: String,
     val cookableToggle: String,
     val cookableSubtitle: String,
     val ingredientsIHave: String,
@@ -346,6 +347,7 @@ data class Strings(
             search = SearchStrings(
                 title = "Buscar recetas",
                 placeholder = "Buscar recetas…",
+                filterBtn = "Filtros",
                 cookableToggle = "Solo cocinables",
                 cookableSubtitle = "Con lo que tenés en tu despensa",
                 ingredientsIHave = "Ingredientes que tengo",
@@ -623,6 +625,7 @@ data class Strings(
             search = SearchStrings(
                 title = "Search recipes",
                 placeholder = "Search recipes…",
+                filterBtn = "Filters",
                 cookableToggle = "Cookable only",
                 cookableSubtitle = "With what you have in your pantry",
                 ingredientsIHave = "Ingredients I have",

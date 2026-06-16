@@ -48,6 +48,9 @@ fun SearchScreen(
     var showDifficultyFilter by remember { mutableStateOf(false) }
     var showCookableOnly by remember { mutableStateOf(false) }
     var selectedEquipment by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var showFilters by remember { mutableStateOf(false) }
+
+    val filterActive = selectedIngredients.isNotEmpty() || selectedDifficulty != null || selectedEquipment.isNotEmpty()
 
     LaunchedEffect(Unit) { viewModel.setCategory("All") }
 
@@ -191,8 +194,39 @@ fun SearchScreen(
                 }
             }
 
+            // ── Filters toggle ────────────────────────────────────────────────────
+            item(key = "filters_toggle") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = showFilters,
+                        onClick = { showFilters = !showFilters },
+                        label = { Text(strings.search.filterBtn) },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Filled.FilterList,
+                                contentDescription = null,
+                                Modifier.size(18.dp)
+                            )
+                        },
+                        shape = RoundedCornerShape(50)
+                    )
+                    if (filterActive) {
+                        TextButton(onClick = {
+                            selectedIngredients = emptySet()
+                            selectedEquipment = emptySet()
+                            selectedDifficulty = null
+                        }) {
+                            Text(strings.tools.clear, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+            }
+
             // ── Ingredients section ──────────────────────────────────────────────
-            if (ingredientOptions.isNotEmpty()) {
+            if (showFilters && ingredientOptions.isNotEmpty()) {
                 item(key = "ingredients_header") {
                     SectionCard(title = strings.search.ingredientsIHave) {
                         if (selectedIngredients.isNotEmpty()) {
@@ -212,7 +246,7 @@ fun SearchScreen(
             }
 
             // ── Equipment section ──────────────────────────────────────────────
-            if (equipmentOptions.isNotEmpty()) {
+            if (showFilters && equipmentOptions.isNotEmpty()) {
                 item(key = "equipment_header") {
                     SectionCard(title = strings.search.utensils) {
                         ChipGrid(chips = equipmentOptions, selected = selectedEquipment) {
@@ -224,37 +258,39 @@ fun SearchScreen(
             }
 
             // ── Difficulty section ──────────────────────────────────────────────
-            item(key = "difficulty_header") {
-                SectionCard(title = strings.search.difficulty) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(0.dp)
-                    ) {
-                        listOf("easy", "medium", "hard").forEachIndexed { idx, d ->
-                            val isSel = selectedDifficulty == d
-                            Surface(
-                                onClick = { selectedDifficulty = if (isSel) null else d },
-                                shape = if (idx == 0) RoundedCornerShape(topStart = 50.dp, bottomStart = 50.dp)
-                                else if (idx == 2) RoundedCornerShape(topEnd = 50.dp, bottomEnd = 50.dp)
-                                else RoundedCornerShape(0.dp),
-                                color = if (isSel) MaterialTheme.colorScheme.primary
-                                else Color.Transparent,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(
-                                    text = when (d) {
-                                        "easy" -> strings.search.easy
-                                        "medium" -> strings.search.medium
-                                        else -> strings.search.hard
-                                    },
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.5.sp,
-                                    color = if (isSel) MaterialTheme.colorScheme.onPrimary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(vertical = 10.dp).fillMaxWidth(),
-                                    textAlign = TextAlign.Center
-                                )
+            if (showFilters) {
+                item(key = "difficulty_header") {
+                    SectionCard(title = strings.search.difficulty) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(0.dp)
+                        ) {
+                            listOf("easy", "medium", "hard").forEachIndexed { idx, d ->
+                                val isSel = selectedDifficulty == d
+                                Surface(
+                                    onClick = { selectedDifficulty = if (isSel) null else d },
+                                    shape = if (idx == 0) RoundedCornerShape(topStart = 50.dp, bottomStart = 50.dp)
+                                    else if (idx == 2) RoundedCornerShape(topEnd = 50.dp, bottomEnd = 50.dp)
+                                    else RoundedCornerShape(0.dp),
+                                    color = if (isSel) MaterialTheme.colorScheme.primary
+                                    else Color.Transparent,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(
+                                        text = when (d) {
+                                            "easy" -> strings.search.easy
+                                            "medium" -> strings.search.medium
+                                            else -> strings.search.hard
+                                        },
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 0.5.sp,
+                                        color = if (isSel) MaterialTheme.colorScheme.onPrimary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(vertical = 10.dp).fillMaxWidth(),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         }
                     }
@@ -347,8 +383,9 @@ fun SearchScreen(
                                     Text(strings.search.addMissingCount.replace("{count}", "${missing.size}"), style = MaterialTheme.typography.labelSmall)
                                 }
                             }
-                        }
+                }
             }
+            } // if showFilters
         }
 
         // Shopping cart FAB
