@@ -40,4 +40,8 @@
 40: [FIXED] More descriptive expiry dates (Vence hoy/mañana/en X días)
 41: [FIXED] Favorites double tap (optimistic local update)
 42: [CLOSED] End of bug report
-43: [PENDING] Update checklist
+43: [FIXED] SearchScreen FAB scope: Modifier.align(Alignment.BottomEnd) inside Column instead of Box (compilation error)
+44: [FIXED] AddEditScreen camera permission: only checked on Android >= 13, crashed on older versions
+45: [FIXED] SearchScreen redundant ternary: `if (showCookableOnly) cookableList else cookableList`
+46: [FIXED] ShoppingScreen title: displaySmall -> headlineMedium for consistency
+47: [PENDING] Update checklist
