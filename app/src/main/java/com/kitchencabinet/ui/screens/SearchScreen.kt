@@ -104,7 +104,7 @@ fun SearchScreen(
         val othersList = evaluated.filter { it.totalCount > 0 && it.matchedCount == 0 }.map { it.recipe }
 
         Triple(
-            if (showCookableOnly) cookableList else cookableList,
+            cookableList,
             if (showCookableOnly) emptyList() else almostList,
             if (showCookableOnly) emptyList() else othersList
         )
@@ -387,6 +387,7 @@ fun SearchScreen(
             }
             } // if showFilters
         }
+    }
 
         // Shopping cart FAB
         if (shoppingItems.isNotEmpty()) {
@@ -404,8 +405,6 @@ fun SearchScreen(
                 }
             }
         }
-    }
-}
     }
 }
 

@@ -103,7 +103,7 @@ fun ShoppingScreen(
                     Column(modifier = Modifier.padding(bottom = 4.dp)) {
                         Text(
                             strings.shopping.title,
-                            style = MaterialTheme.typography.displaySmall,
+                            style = MaterialTheme.typography.headlineMedium,
                             fontFamily = NewsreaderFontFamily,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onBackground,

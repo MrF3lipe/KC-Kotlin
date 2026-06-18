@@ -6,7 +6,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.clickable
@@ -61,7 +60,10 @@ fun AddEditScreen(
     var existingRecipe by remember { mutableStateOf<Recipe?>(null) }
     var tagsInput by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    data class IngredientField(val name: String = "", val quantity: String = "", val key: Int = 0)
+    data class IngredientField(val name: String = "", val quantity: String = "", val unit: String = "", val key: Int = 0)
+
+    val units = listOf("ud", "g", "kg", "ml", "L")
+    val unitLabels = mapOf("ud" to "ud (unidades)", "g" to "g (gramos)", "kg" to "kg (kilogramos)", "ml" to "ml (mililitros)", "L" to "L (litros)")
 
     var ingredientFields by remember { mutableStateOf(listOf(IngredientField(key = 0))) }
     var equipmentFields by remember { mutableStateOf(listOf("")) }
@@ -138,7 +140,12 @@ fun AddEditScreen(
 
     fun collectFields() = ingredientFields
         .filter { it.name.isNotBlank() }
-        .map { Ingredient(it.name.trim(), it.quantity.trim()) }
+        .map {
+            val qty = it.quantity.trim()
+            val unit = it.unit.trim()
+            val combined = if (unit.isNotEmpty()) "$qty $unit".trim() else qty
+            Ingredient(it.name.trim(), combined)
+        }
 
     fun collectEquipment() = equipmentFields
         .filter { it.isNotBlank() }
@@ -268,7 +275,7 @@ fun AddEditScreen(
                 }
                 FilledTonalButton(
                     onClick = {
-                        if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         } else {
                             val uri = createCameraUri()
