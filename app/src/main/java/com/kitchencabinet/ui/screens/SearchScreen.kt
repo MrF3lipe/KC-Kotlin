@@ -387,22 +387,22 @@ fun SearchScreen(
             }
             } // if showFilters
         }
-    }
+        } // LazyColumn
+    } // outer Column
 
-        // Shopping cart FAB
-        if (shoppingItems.isNotEmpty()) {
-            FloatingActionButton(
-                onClick = onNavigateToShopping,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                BadgedBox(badge = {
-                    Badge { Text("${shoppingItems.size}", style = MaterialTheme.typography.labelSmall) }
-                }) {
-                    Icon(Icons.Filled.ShoppingCart, contentDescription = null)
-                }
+    // Shopping cart FAB
+    if (shoppingItems.isNotEmpty()) {
+        FloatingActionButton(
+            onClick = onNavigateToShopping,
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            BadgedBox(badge = {
+                Badge { Text("${shoppingItems.size}", style = MaterialTheme.typography.labelSmall) }
+            }) {
+                Icon(Icons.Filled.ShoppingCart, contentDescription = null)
             }
         }
     }
