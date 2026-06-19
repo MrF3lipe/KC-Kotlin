@@ -383,12 +383,12 @@ fun SearchScreen(
                                     Text(strings.search.addMissingCount.replace("{count}", "${missing.size}"), style = MaterialTheme.typography.labelSmall)
                                 }
                             }
+                        }
+                    }
                 }
             }
-            } // if showFilters
         }
-        } // LazyColumn
-    } // outer Column
+    }
 
     // Shopping cart FAB
     if (shoppingItems.isNotEmpty()) {
@@ -406,6 +406,7 @@ fun SearchScreen(
             }
         }
     }
+}
 }
 
 @Composable
