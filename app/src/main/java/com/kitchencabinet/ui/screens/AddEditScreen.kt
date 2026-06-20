@@ -86,16 +86,6 @@ fun AddEditScreen(
         }
     }
 
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) {
-            val uri = createCameraUri()
-            cameraImageUri = uri
-            cameraLauncher.launch(uri)
-        }
-    }
-
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success: Boolean ->
@@ -114,6 +104,16 @@ fun AddEditScreen(
             "${context.packageName}.fileprovider",
             file
         )
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val uri = createCameraUri()
+            cameraImageUri = uri
+            cameraLauncher.launch(uri)
+        }
     }
 
     LaunchedEffect(recipeId) {
@@ -512,7 +512,7 @@ fun AddEditScreen(
                                 Text("${item.quantity} ${item.unit}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             FilledTonalButton(onClick = {
-                                onPantryPick(item.name, "${item.quantity.toIntOrNull() ?: item.quantity} ${item.unit}")
+                                onPantryPick(item.name, "${item.quantity.toInt()} ${item.unit}")
                             }, shape = RoundedCornerShape(50)) {
                                 Text(strings.addEdit.pickFromPantry, style = MaterialTheme.typography.labelSmall)
                             }
